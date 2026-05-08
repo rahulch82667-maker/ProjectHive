@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { ReduxProvider } from "@/store/Provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,7 +37,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className={`min-h-full flex flex-col ${inter.className}`}>{children}</body>
+      <body className={`min-h-full flex flex-col ${inter.className}`}>
+        <ReduxProvider>{children}</ReduxProvider>
+      </body>
     </html>
   );
 }

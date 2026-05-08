@@ -7,37 +7,57 @@ import LogoHeader from "./LogoHeader";
 import GoogleButton from "./GoogleButton";
 import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
+import { loginUserThunk } from "@/store/slices/authSlice";
+import { useAuth } from "@/hooks/useAuth";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/navigation";
+
+const validationSchema = Yup.object({
+  email: Yup.string().email("Invalid email address").required("Email is required"),
+  password: Yup.string().required("Password is required"),
+});
 
 export default function LoginForm() {
-  const [formData, setFormData] = useState({ username: "", password: "" });
-  const [errors, setErrors] = useState({ username: false, password: false });
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useAuth();
+  const router = useRouter();
+  const [firebaseError, setFirebaseError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: false }));
-  };
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      setFirebaseError("");
+      try {
+        // 1. Sign in with Firebase
+        await signInWithEmailAndPassword(auth, values.email, values.password);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors = {
-      username: formData.username.trim() === "",
-      password: formData.password.trim() === "",
-    };
-    
-    setErrors(newErrors);
+        // 2. Fetch user profile from backend (token is handled by axios interceptor)
+        await dispatch(loginUserThunk()).unwrap();
 
-    if (!newErrors.username && !newErrors.password) {
-      // Proceed with login logic
-      console.log("Submitting login", formData);
-    }
-  };
+        // 3. Redirect to dashboard
+        router.push("/");
+      } catch (err: any) {
+        console.error("Login error:", err);
+        const errorMessage = typeof err === 'string' ? err : (err.message || "Invalid email or password");
+        setFirebaseError(errorMessage);
+      }
+    },
+  });
 
   return (
     <AuthCard>
       <LogoHeader />
       
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+      <form onSubmit={formik.handleSubmit} className="flex flex-col space-y-4">
         <GoogleButton />
         
         <div className="flex items-center my-2">
@@ -46,16 +66,23 @@ export default function LoginForm() {
           <div className="flex-1 border-t border-[#c8a882]/40"></div>
         </div>
 
+        {firebaseError && <p className="text-red-500 text-sm text-center">{firebaseError}</p>}
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
         <InputField
-          label="Username"
-          id="username"
-          name="username"
-          type="text"
-          placeholder="Enter your username"
-          value={formData.username}
-          onChange={handleChange}
-          error={errors.username}
+          label="Email address"
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Enter your email"
+          value={formik.values.email}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.email && Boolean(formik.errors.email)}
         />
+        {formik.touched.email && formik.errors.email && (
+          <p className="text-red-500 text-xs mt-1">{formik.errors.email}</p>
+        )}
         
         <InputField
           label="Password"
@@ -63,10 +90,14 @@ export default function LoginForm() {
           name="password"
           type="password"
           placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          error={errors.password}
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.password && Boolean(formik.errors.password)}
         />
+        {formik.touched.password && formik.errors.password && (
+          <p className="text-red-500 text-xs mt-1">{formik.errors.password}</p>
+        )}
 
         <div className="flex items-center justify-between mt-2 mb-4">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -85,7 +116,10 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <SubmitButton label="Sign in" />
+        <SubmitButton 
+          label={loading || formik.isSubmitting ? "Signing in..." : "Sign in"} 
+          disabled={loading || formik.isSubmitting} 
+        />
         
         <p className="text-center text-sm text-[#a17c5b] mt-4">
           New User?{" "}
