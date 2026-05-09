@@ -16,6 +16,11 @@ export interface AuthResponse {
   role: string;
 }
 
+export interface GenericResponse {
+  success: boolean;
+  message: string;
+}
+
 export const signupApi = async (data: { firebaseUid: string; email: string; name: string; provider: string; avatar?: string }): Promise<AuthResponse> => {
   const idToken = await getIdToken();
   const response = await api.post('/auth/signup', data, {
@@ -47,5 +52,10 @@ export const getMeApi = async (): Promise<AuthResponse> => {
 
 export const logoutApi = async (): Promise<{ status: string; message: string }> => {
   const response = await api.post('/auth/logout');
+  return response.data;
+};
+
+export const forgotPasswordApi = async (email: string): Promise<GenericResponse> => {
+  const response = await api.post('/auth/forgot-password', { email });
   return response.data;
 };

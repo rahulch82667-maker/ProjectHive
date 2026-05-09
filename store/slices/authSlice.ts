@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AuthResponse, loginApi, signupApi, googleAuthApi, getMeApi } from '@/services/auth/auth.api';
+import { AuthResponse, loginApi, signupApi, googleAuthApi, getMeApi, forgotPasswordApi } from '@/services/auth/auth.api';
 
 interface AuthState {
   user: AuthResponse | null;
@@ -49,6 +49,15 @@ export const googleAuthThunk = createAsyncThunk('auth/google', async (_, { rejec
     return data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message || 'Google authentication failed');
+  }
+});
+
+export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (email: string, { rejectWithValue }) => {
+  try {
+    const data = await forgotPasswordApi(email);
+    return data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || error.message || 'Forgot password failed');
   }
 });
 
@@ -125,6 +134,19 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
     });
     builder.addCase(googleAuthThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Forgot Password
+    builder.addCase(forgotPassword.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(forgotPassword.fulfilled, (state) => {
+      state.loading = false;
+    });
+    builder.addCase(forgotPassword.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

@@ -5,6 +5,9 @@ import admin from '../config/firebase-admin';
 import { sendTokenCookies, clearTokenCookies } from '../utils/token';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
+import { sendEmail } from '../utils/email';
+import { sendResponse } from '../utils/responseHandler';
+import crypto from 'crypto';
 
 // @desc    Register new user
 // @route   POST /api/auth/signup
@@ -154,4 +157,56 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   clearTokenCookies(res);
   res.status(200).json({ status: 'success', message: 'Logged out successfully' });
+});
+
+// @desc    Forgot Password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  // Check if user exists in our DB
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return sendResponse({
+      res,
+      statusCode: 404,
+      success: false,
+      message: 'There is no user with that email',
+    });
+  }
+
+  try {
+    // Generate Firebase password reset link
+    const resetLink = await admin.auth().generatePasswordResetLink(email);
+
+    // Send custom email with Firebase reset link
+    await sendEmail({
+      email: user.email,
+      subject: 'Password Reset Request',
+      message: resetLink, // Passing the Firebase link to the template
+    });
+
+    sendResponse({
+      res,
+      statusCode: 200,
+      success: true,
+      message: 'Password reset link sent to your email',
+    });
+  } catch (error: any) {
+    console.error('Firebase reset link error:', error);
+    
+    let message = 'Error sending password reset link';
+    if (error.code === 'auth/user-not-found') {
+      message = 'User not found in Firebase';
+    }
+
+    return sendResponse({
+      res,
+      statusCode: 500,
+      success: false,
+      message,
+    });
+  }
 });
