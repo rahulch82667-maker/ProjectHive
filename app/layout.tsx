@@ -33,11 +33,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className={`min-h-full flex flex-col ${inter.className}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={inter.className}>
         <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>
