@@ -23,8 +23,8 @@
   --color-brown-800: #4e342e;
   --color-brown-900: #3e2723;
 
-  --color-primary: var(--color-brown-700);
-  --color-primary-hover: var(--color-brown-800);
+  --color-primary: #5d4037;
+  --color-primary-hover: #4e342e;
 }
 
 @media (prefers-color-scheme: dark) {
