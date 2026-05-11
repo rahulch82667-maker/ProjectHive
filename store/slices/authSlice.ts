@@ -21,6 +21,10 @@ export const fetchCurrentUser = createAsyncThunk('auth/fetchCurrentUser', async 
     const data = await getMeApi();
     return data;
   } catch (error: any) {
+    // If it's a 401, we don't want to show an error message as it's a normal state (not logged in)
+    if (error.response?.status === 401) {
+      return rejectWithValue(null);
+    }
     return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch user');
   }
 });

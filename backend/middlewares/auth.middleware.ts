@@ -28,6 +28,11 @@ export const protect = asyncHandler(async (req: Request, res: Response, next: Ne
         throw new Error('Not authorized, user not found');
       }
 
+      if (user.isBlocked) {
+        res.status(403);
+        throw new Error('Your account has been blocked. Please contact support.');
+      }
+
       req.user = user;
       return next();
     } catch (error) {

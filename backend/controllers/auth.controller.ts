@@ -63,6 +63,11 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   
   const user = await loginUser(decodedToken.uid, decodedToken.email || '');
 
+  if (user.isBlocked) {
+    res.status(403);
+    throw new Error('Your account has been blocked. Please contact support.');
+  }
+
   sendTokenCookies(res, user._id.toString());
 
   res.status(200).json({
@@ -91,6 +96,11 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
   const { name, picture, email } = decodedToken;
 
   const user = await syncGoogleUser(decodedToken.uid, email || '', name || 'Google User', picture || '');
+
+  if (user.isBlocked) {
+    res.status(403);
+    throw new Error('Your account has been blocked. Please contact support.');
+  }
 
   sendTokenCookies(res, user._id.toString());
 
@@ -139,6 +149,11 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
     if (!user) {
       res.status(401);
       throw new Error('User not found');
+    }
+
+    if (user.isBlocked) {
+      res.status(403);
+      throw new Error('Your account has been blocked. Please contact support.');
     }
 
     sendTokenCookies(res, user._id.toString());

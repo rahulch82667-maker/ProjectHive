@@ -39,11 +39,13 @@ api.interceptors.response.use(
 
         // Retry the original request
         return api(originalRequest);
-      } catch (refreshError) {
-        // If refresh fails, redirect to login or logout
-        console.error('Token refresh failed:', refreshError);
-        // Clear local storage or state if needed
-        // window.location.href = '/login'; 
+      } catch (refreshError: any) {
+        // If refresh fails with 401, it just means the user is not logged in or session expired
+        // We only log if it's a different kind of error (e.g., 500, network error)
+        if (refreshError.response?.status !== 401) {
+          console.error('Token refresh failed:', refreshError);
+        }
+        
         return Promise.reject(refreshError);
       }
     }

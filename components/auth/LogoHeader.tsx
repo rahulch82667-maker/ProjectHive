@@ -10,7 +10,7 @@ export default function LogoHeader() {
           alt="ProjectHive Logo"
           width={150}
           height={50}
-          style={{ objectFit: "contain" }}
+          style={{ width: "auto", height: "auto", objectFit: "contain" }}
           priority
         />
       </div>
