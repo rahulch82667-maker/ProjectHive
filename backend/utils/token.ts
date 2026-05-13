@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Response } from 'express';
+import { cookies } from 'next/headers';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'secret_access';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'secret_refresh';
@@ -16,9 +16,11 @@ export const generateRefreshToken = (userId: string) => {
   });
 };
 
-export const sendTokenCookies = (res: Response, userId: string) => {
+export const sendTokenCookies = async (userId: string) => {
   const accessToken = generateAccessToken(userId);
   const refreshToken = generateRefreshToken(userId);
+
+  const cookieStore = await cookies();
 
   const cookieOptions = {
     httpOnly: true,
@@ -27,27 +29,22 @@ export const sendTokenCookies = (res: Response, userId: string) => {
   };
 
   // Access token cookie (expires in 15m)
-  res.cookie('access_token', accessToken, {
+  cookieStore.set('access_token', accessToken, {
     ...cookieOptions,
-    maxAge: 15 * 60 * 1000,
+    maxAge: 15 * 60, // Next.js cookies use seconds for maxAge sometimes, but it's fine
   });
 
   // Refresh token cookie (expires in 7d)
-  res.cookie('refresh_token', refreshToken, {
+  cookieStore.set('refresh_token', refreshToken, {
     ...cookieOptions,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60,
   });
 
   return { accessToken, refreshToken };
 };
 
-export const clearTokenCookies = (res: Response) => {
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
-  };
-
-  res.clearCookie('access_token', cookieOptions);
-  res.clearCookie('refresh_token', cookieOptions);
+export const clearTokenCookies = async () => {
+  const cookieStore = await cookies();
+  cookieStore.delete('access_token');
+  cookieStore.delete('refresh_token');
 };

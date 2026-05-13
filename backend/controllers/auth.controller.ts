@@ -1,62 +1,52 @@
-import { Request, Response } from 'express';
-import { asyncHandler } from '../utils/asyncHandler';
+import { NextRequest, NextResponse } from 'next/server';
 import { registerUser, loginUser, syncGoogleUser } from '../services/auth.service';
 import admin from '../config/firebase-admin';
 import { sendTokenCookies, clearTokenCookies } from '../utils/token';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 import { sendEmail } from '../utils/email';
-import { sendResponse } from '../utils/responseHandler';
-import crypto from 'crypto';
+import { connectDB } from '../config/db';
+import { protect } from '../middlewares/auth.middleware';
+import { cookies } from 'next/headers';
 
-// @desc    Register new user
-// @route   POST /api/auth/signup
-// @access  Public
-export const signup = asyncHandler(async (req: Request, res: Response) => {
-  const { firebaseUid, email, name, provider, avatar } = req.body;
+export const signup = async (req: NextRequest) => {
+  await connectDB();
+  const { firebaseUid, email, name, provider, avatar } = await req.json();
 
   if (!firebaseUid || !email || !name) {
-    res.status(400);
-    throw new Error('Please include all fields');
+    return NextResponse.json({ message: 'Please include all fields' }, { status: 400 });
   }
 
-  // Verify that the token belongs to this user (optional but recommended for security)
-  // The token should be in req.headers.authorization
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.get('authorization')?.split(' ')[1];
   if (!token) {
-    res.status(401);
-    throw new Error('No Firebase token provided');
+    return NextResponse.json({ message: 'No Firebase token provided' }, { status: 401 });
   }
 
   const decodedToken = await admin.auth().verifyIdToken(token);
   if (decodedToken.uid !== firebaseUid) {
-    res.status(403);
-    throw new Error('Invalid Firebase token for this user');
+    return NextResponse.json({ message: 'Invalid Firebase token for this user' }, { status: 403 });
   }
 
   const user = await registerUser(firebaseUid, email, name, provider || 'email', avatar);
 
-  sendTokenCookies(res, user._id.toString());
+  await sendTokenCookies(user._id.toString());
 
-  res.status(201).json({
+  return NextResponse.json({
     _id: user._id,
     firebaseUid: user.firebaseUid,
     name: user.name,
     email: user.email,
     avatar: user.avatar,
     role: user.role,
-  });
-});
+  }, { status: 201 });
+};
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
-export const login = asyncHandler(async (req: Request, res: Response) => {
-  const token = req.headers.authorization?.split(' ')[1];
+export const login = async (req: NextRequest) => {
+  await connectDB();
+  const token = req.headers.get('authorization')?.split(' ')[1];
   
   if (!token) {
-    res.status(401);
-    throw new Error('No Firebase token provided');
+    return NextResponse.json({ message: 'No Firebase token provided' }, { status: 401 });
   }
 
   const decodedToken = await admin.auth().verifyIdToken(token);
@@ -64,31 +54,27 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const user = await loginUser(decodedToken.uid, decodedToken.email || '');
 
   if (user.isBlocked) {
-    res.status(403);
-    throw new Error('Your account has been blocked. Please contact support.');
+    return NextResponse.json({ message: 'Your account has been blocked. Please contact support.' }, { status: 403 });
   }
 
-  sendTokenCookies(res, user._id.toString());
+  await sendTokenCookies(user._id.toString());
 
-  res.status(200).json({
+  return NextResponse.json({
     _id: user._id,
     firebaseUid: user.firebaseUid,
     name: user.name,
     email: user.email,
     avatar: user.avatar,
     role: user.role,
-  });
-});
+  }, { status: 200 });
+};
 
-// @desc    Google Login/Signup
-// @route   POST /api/auth/google
-// @access  Public
-export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
-  const token = req.headers.authorization?.split(' ')[1];
+export const googleAuth = async (req: NextRequest) => {
+  await connectDB();
+  const token = req.headers.get('authorization')?.split(' ')[1];
   
   if (!token) {
-    res.status(401);
-    throw new Error('No Firebase token provided');
+    return NextResponse.json({ message: 'No Firebase token provided' }, { status: 401 });
   }
 
   const decodedToken = await admin.auth().verifyIdToken(token);
@@ -98,48 +84,44 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
   const user = await syncGoogleUser(decodedToken.uid, email || '', name || 'Google User', picture || '');
 
   if (user.isBlocked) {
-    res.status(403);
-    throw new Error('Your account has been blocked. Please contact support.');
+    return NextResponse.json({ message: 'Your account has been blocked. Please contact support.' }, { status: 403 });
   }
 
-  sendTokenCookies(res, user._id.toString());
+  await sendTokenCookies(user._id.toString());
 
-  res.status(200).json({
+  return NextResponse.json({
     _id: user._id,
     firebaseUid: user.firebaseUid,
     name: user.name,
     email: user.email,
     avatar: user.avatar,
     role: user.role,
-  });
-});
+  }, { status: 200 });
+};
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
-export const getMe = asyncHandler(async (req: Request, res: Response) => {
-  // req.user is set in the auth middleware
-  const user = req.user;
+export const getMe = async (req: NextRequest) => {
+  try {
+    const user = await protect();
+    return NextResponse.json({
+      _id: user._id,
+      firebaseUid: user.firebaseUid,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+    }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 401 });
+  }
+};
 
-  res.status(200).json({
-    _id: user._id,
-    firebaseUid: user.firebaseUid,
-    name: user.name,
-    email: user.email,
-    avatar: user.avatar,
-    role: user.role,
-  });
-});
-
-// @desc    Refresh access token
-// @route   POST /api/auth/refresh
-// @access  Public
-export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
-  const refreshToken = req.cookies.refresh_token;
+export const refreshAccessToken = async (req: NextRequest) => {
+  await connectDB();
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get('refresh_token')?.value;
 
   if (!refreshToken) {
-    res.status(401);
-    throw new Error('No refresh token provided');
+    return NextResponse.json({ message: 'No refresh token provided' }, { status: 401 });
   }
 
   try {
@@ -147,81 +129,58 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
     const user = await User.findById(decoded.id);
 
     if (!user) {
-      res.status(401);
-      throw new Error('User not found');
+      return NextResponse.json({ message: 'User not found' }, { status: 401 });
     }
 
     if (user.isBlocked) {
-      res.status(403);
-      throw new Error('Your account has been blocked. Please contact support.');
+      return NextResponse.json({ message: 'Your account has been blocked. Please contact support.' }, { status: 403 });
     }
 
-    sendTokenCookies(res, user._id.toString());
+    await sendTokenCookies(user._id.toString());
 
-    res.status(200).json({ status: 'success' });
+    return NextResponse.json({ status: 'success' }, { status: 200 });
   } catch (error) {
     console.error('Refresh token error:', error);
-    res.status(401);
-    throw new Error('Invalid refresh token');
+    return NextResponse.json({ message: 'Invalid refresh token' }, { status: 401 });
   }
-});
+};
 
-// @desc    Logout user
-// @route   POST /api/auth/logout
-// @access  Private
-export const logout = asyncHandler(async (req: Request, res: Response) => {
-  clearTokenCookies(res);
-  res.status(200).json({ status: 'success', message: 'Logged out successfully' });
-});
+export const logout = async (req: NextRequest) => {
+  try {
+    await protect();
+    await clearTokenCookies();
+    return NextResponse.json({ status: 'success', message: 'Logged out successfully' }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 401 });
+  }
+};
 
-// @desc    Forgot Password
-// @route   POST /api/auth/forgot-password
-// @access  Public
-export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
-  const { email } = req.body;
+export const forgotPassword = async (req: NextRequest) => {
+  await connectDB();
+  const { email } = await req.json();
 
-  // Check if user exists in our DB
   const user = await User.findOne({ email });
 
   if (!user) {
-    return sendResponse({
-      res,
-      statusCode: 404,
-      success: false,
-      message: 'There is no user with that email',
-    });
+    return NextResponse.json({ success: false, message: 'There is no user with that email' }, { status: 404 });
   }
 
   try {
-    // Generate Firebase password reset link
     const resetLink = await admin.auth().generatePasswordResetLink(email);
 
-    // Send custom email with Firebase reset link
     await sendEmail({
       email: user.email,
       subject: 'Password Reset Request',
-      message: resetLink, // Passing the Firebase link to the template
+      message: resetLink, 
     });
 
-    sendResponse({
-      res,
-      statusCode: 200,
-      success: true,
-      message: 'Password reset link sent to your email',
-    });
+    return NextResponse.json({ success: true, message: 'Password reset link sent to your email' }, { status: 200 });
   } catch (error: any) {
     console.error('Firebase reset link error:', error);
-    
     let message = 'Error sending password reset link';
     if (error.code === 'auth/user-not-found') {
       message = 'User not found in Firebase';
     }
-
-    return sendResponse({
-      res,
-      statusCode: 500,
-      success: false,
-      message,
-    });
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
-});
+};
