@@ -30,9 +30,9 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Call refresh token endpoint
+        // Call refresh token endpoint through the Next.js API route
         await axios.post(
-          `${api.defaults.baseURL}/auth/refresh`,
+          `${api.defaults.baseURL}/api/auth/refresh`,
           {},
           { withCredentials: true }
         );

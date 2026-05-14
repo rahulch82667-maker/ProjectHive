@@ -26,6 +26,7 @@ export const sendTokenCookies = async (userId: string) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
+    path: '/',
   };
 
   // Access token cookie (expires in 15m)

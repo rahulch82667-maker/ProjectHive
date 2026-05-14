@@ -6,12 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "backend:dev": "cd backend && npx tsx server.ts",
+    "backend:build": "cd backend && npx tsc",
+    "backend:start": "cd backend && node dist/server.js"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.16.0",
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
