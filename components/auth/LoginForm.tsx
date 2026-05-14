@@ -41,10 +41,14 @@ export default function LoginForm() {
         await signInWithEmailAndPassword(auth, values.email, values.password);
 
         // 2. Fetch user profile from backend (token is handled by axios interceptor)
-        await dispatch(loginUserThunk()).unwrap();
+        const userData = await dispatch(loginUserThunk()).unwrap();
 
-        // 3. Redirect to dashboard
-        router.push("/");
+        // 3. Redirect based on role
+        if (userData.role === 'admin') {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
       } catch (err: any) {
         console.error("Login error:", err);
         const errorMessage = typeof err === 'string' ? err : (err.message || "Invalid email or password");

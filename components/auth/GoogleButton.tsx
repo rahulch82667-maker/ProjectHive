@@ -17,8 +17,12 @@ export default function GoogleButton() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      await dispatch(googleAuthThunk()).unwrap();
-      router.push('/');                            // redirect on success
+      const userData = await dispatch(googleAuthThunk()).unwrap();
+      if (userData.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       console.error('Google login failed', error);
     }

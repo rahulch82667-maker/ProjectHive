@@ -6,3 +6,4 @@ export { default as GoogleButton } from './GoogleButton';
 export { default as SubmitButton } from './SubmitButton';
 export { default as LoginForm } from './LoginForm';
 export { default as SignupForm } from './SignupForm';
+export { ProtectedRoute, AdminProtectedRoute, UserProtectedRoute } from './ProtectedRoute';

@@ -13,7 +13,7 @@ export interface AuthResponse {
   name: string;
   email: string;
   avatar: string;
-  role: string;
+  role: 'user' | 'admin';
 }
 
 export interface GenericResponse {
