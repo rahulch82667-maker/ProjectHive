@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
+import { Folder } from 'lucide-react';
 import { uploadToCloudinary, CloudinaryUploadResponse } from '@/services/cloudinary.service';
 
 interface FormFileUploadProps {
@@ -133,7 +134,9 @@ export const FormFileUpload: React.FC<FormFileUploadProps> = ({
         />
         <label htmlFor={`file-upload-${Date.now()}`} className="cursor-pointer">
           <div className="space-y-2">
-            <div className="text-3xl">📁</div>
+            <div className="flex justify-center">
+              <Folder className="h-12 w-12 text-slate-400" />
+            </div>
             {uploading ? (
               <div>
                 <p className="font-medium text-slate-700">Uploading...</p>
