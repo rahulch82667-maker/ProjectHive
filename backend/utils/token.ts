@@ -26,10 +26,13 @@ export const sendTokenCookies = async (userId: string) => {
   // Locally, can use 'lax' with secure: false for HTTP
   const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
   
+  // Define sameSite value with proper type
+  const sameSiteValue: 'none' | 'lax' = isProduction ? 'none' : 'lax';
+  
   const cookieOptions = {
     httpOnly: true,
     secure: isProduction,
-    sameSite: (isProduction ? 'none' : 'lax') as const,
+    sameSite: sameSiteValue,
     path: '/',
   };
 
