@@ -8,6 +8,9 @@ const api = axios.create({
   },
 });
 
+// Module-level flag to prevent infinite refresh loops
+let isRefreshing = false;
+
 // Request interceptor: Usually we don't need to do much here now that we use cookies.
 // But we'll keep it for cases where we might still want to pass a token manually.
 api.interceptors.request.use(
@@ -25,23 +28,20 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't retried yet
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      // CRITICAL: Don't try to refresh if the failed request was already the refresh endpoint
-      // This prevents infinite loops
-      if (originalRequest.url?.includes('/auth/refresh')) {
-        return Promise.reject(error);
-      }
-
-      originalRequest._retry = true;
+    // If error is 401 and we're not already attempting to refresh
+    if (error.response && error.response.status === 401 && !isRefreshing) {
+      isRefreshing = true;
 
       try {
         // Call refresh token endpoint through the Next.js API route
         await api.post('/auth/refresh', {}, { withCredentials: true });
 
+        isRefreshing = false;
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError: any) {
+        isRefreshing = false;
+        
         // If refresh fails, user must re-authenticate
         if (refreshError.response?.status !== 401) {
           console.error('Token refresh failed:', refreshError);
