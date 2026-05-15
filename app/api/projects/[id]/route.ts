@@ -4,10 +4,14 @@ import Project from '@/backend/models/Project';
 import { protect } from '@/backend/middlewares/auth.middleware';
 import mongoose from 'mongoose';
 
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
+//  GET
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!mongoose.isValidObjectId(id)) {
       return NextResponse.json({ message: 'Invalid project ID' }, { status: 400 });
@@ -24,15 +28,22 @@ export async function GET(request: NextRequest, context: { params: { id: string 
     return NextResponse.json(project);
   } catch (error: any) {
     console.error('Project GET by ID error:', error);
-    return NextResponse.json({ message: error.message || 'Failed to fetch project' }, { status: 500 });
+    return NextResponse.json(
+      { message: error.message || 'Failed to fetch project' },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+//  PUT
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     const user = await protect();
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!mongoose.isValidObjectId(id)) {
       return NextResponse.json({ message: 'Invalid project ID' }, { status: 400 });
@@ -42,6 +53,8 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     if (!project) {
       return NextResponse.json({ message: 'Project not found' }, { status: 404 });
     }
+
+    const body = await request.json();
 
     const {
       title,
@@ -65,7 +78,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
       requirements,
       fileSize,
       version,
-    } = await request.json();
+    } = body;
 
     if (title) {
       project.title = title;
@@ -76,6 +89,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-');
     }
+
     if (shortDescription) project.shortDescription = shortDescription;
     if (fullDescription) project.fullDescription = fullDescription;
     if (price !== undefined) project.price = price;
@@ -98,26 +112,38 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     if (version) project.version = version;
 
     project.updatedBy = user._id;
+
     const updatedProject = await project.save();
 
-    return NextResponse.json({ message: 'Project updated successfully', project: updatedProject });
+    return NextResponse.json({
+      message: 'Project updated successfully',
+      project: updatedProject,
+    });
   } catch (error: any) {
     console.error('Project PUT error:', error);
-    return NextResponse.json({ message: error.message || 'Failed to update project' }, { status: 500 });
+    return NextResponse.json(
+      { message: error.message || 'Failed to update project' },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+//  DELETE
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     await protect();
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!mongoose.isValidObjectId(id)) {
       return NextResponse.json({ message: 'Invalid project ID' }, { status: 400 });
     }
 
     const project = await Project.findByIdAndDelete(id);
+
     if (!project) {
       return NextResponse.json({ message: 'Project not found' }, { status: 404 });
     }
@@ -125,6 +151,9 @@ export async function DELETE(request: NextRequest, context: { params: { id: stri
     return NextResponse.json({ message: 'Project deleted successfully' });
   } catch (error: any) {
     console.error('Project DELETE error:', error);
-    return NextResponse.json({ message: error.message || 'Failed to delete project' }, { status: 500 });
+    return NextResponse.json(
+      { message: error.message || 'Failed to delete project' },
+      { status: 500 }
+    );
   }
 }
