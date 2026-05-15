@@ -27,6 +27,12 @@ api.interceptors.response.use(
 
     // If error is 401 and we haven't retried yet
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      // CRITICAL: Don't try to refresh if the failed request was already the refresh endpoint
+      // This prevents infinite loops
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
@@ -36,8 +42,7 @@ api.interceptors.response.use(
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError: any) {
-        // If refresh fails with 401, it just means the user is not logged in or session expired
-        // We only log if it's a different kind of error (e.g., 500, network error)
+        // If refresh fails, user must re-authenticate
         if (refreshError.response?.status !== 401) {
           console.error('Token refresh failed:', refreshError);
         }

@@ -22,10 +22,14 @@ export const sendTokenCookies = async (userId: string) => {
 
   const cookieStore = await cookies();
 
+  // CRITICAL: In production (Vercel), use 'none' with secure: true for HTTPS
+  // Locally, can use 'lax' with secure: false for HTTP
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
+    secure: isProduction,
+    sameSite: (isProduction ? 'none' : 'lax') as const,
     path: '/',
   };
 
