@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
+  baseURL: '/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -31,11 +31,7 @@ api.interceptors.response.use(
 
       try {
         // Call refresh token endpoint through the Next.js API route
-        await axios.post(
-          `${api.defaults.baseURL}/api/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        await api.post('/auth/refresh', {}, { withCredentials: true });
 
         // Retry the original request
         return api(originalRequest);

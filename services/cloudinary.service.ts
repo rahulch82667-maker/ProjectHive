@@ -1,3 +1,5 @@
+import api from './api/axios';
+
 export interface CloudinaryUploadResponse {
   public_id: string;
   secure_url: string;
@@ -40,21 +42,16 @@ export const uploadToCloudinary = async (
   }
 
   try {
-    const response = await fetch('/api/cloudinary/upload', {
-      method: 'POST',
-      body: formData,
+    const response = await api.post('/cloudinary/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Cloudinary upload failed (${response.status}): ${errorBody}`);
-    }
-
-    const data: CloudinaryUploadResponse = await response.json();
-    return data;
-  } catch (error) {
+    return response.data;
+  } catch (error: any) {
     console.error('Cloudinary upload error:', error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -85,22 +82,11 @@ export const uploadMultipleToCloudinary = async (
  */
 export const deleteFromCloudinary = async (publicId: string): Promise<any> => {
   try {
-    const response = await fetch(`/api/cloudinary/delete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ publicId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to delete file from Cloudinary');
-    }
-
-    return await response.json();
-  } catch (error) {
+    const response = await api.post('/cloudinary/delete', { publicId });
+    return response.data;
+  } catch (error: any) {
     console.error('Cloudinary delete error:', error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 

@@ -23,7 +23,7 @@ export interface GenericResponse {
 
 export const signupApi = async (data: { firebaseUid: string; email: string; name: string; provider: string; avatar?: string }): Promise<AuthResponse> => {
   const idToken = await getIdToken();
-  const response = await api.post('/api/auth/signup', data, {
+  const response = await api.post('/auth/signup', data, {
     headers: idToken ? { Authorization: `Bearer ${idToken}` } : undefined,
   });
   return response.data;
@@ -31,7 +31,7 @@ export const signupApi = async (data: { firebaseUid: string; email: string; name
 
 export const loginApi = async (): Promise<AuthResponse> => {
   const idToken = await getIdToken();
-  const response = await api.post('/api/auth/login', undefined, {
+  const response = await api.post('/auth/login', undefined, {
     headers: idToken ? { Authorization: `Bearer ${idToken}` } : undefined,
   });
   return response.data;
@@ -39,23 +39,23 @@ export const loginApi = async (): Promise<AuthResponse> => {
 
 export const googleAuthApi = async (): Promise<AuthResponse> => {
   const idToken = await getIdToken();
-  const response = await api.post('/api/auth/google', undefined, {
+  const response = await api.post('/auth/google', undefined, {
     headers: idToken ? { Authorization: `Bearer ${idToken}` } : undefined,
   });
   return response.data;
 };
 
 export const getMeApi = async (): Promise<AuthResponse> => {
-  const response = await api.get('/api/auth/me');
+  const response = await api.get('/auth/me');
   return response.data;
 };
 
 export const logoutApi = async (): Promise<{ status: string; message: string }> => {
-  const response = await api.post('/api/auth/logout');
+  const response = await api.post('/auth/logout');
   return response.data;
 };
 
 export const forgotPasswordApi = async (email: string): Promise<GenericResponse> => {
-  const response = await api.post('/api/auth/forgot-password', { email });
+  const response = await api.post('/auth/forgot-password', { email });
   return response.data;
 };
