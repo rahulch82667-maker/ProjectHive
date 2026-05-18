@@ -9,27 +9,68 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const limit = parseInt(searchParams.get('limit') || '12', 10);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const status = searchParams.get('status');
+    
+    const tagsParam = searchParams.get('tags');
+    const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : undefined;
+    
+    const technologiesParam = searchParams.get('technologies');
+    const technologies = technologiesParam ? technologiesParam.split(',').filter(Boolean) : undefined;
+    
+    const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined;
+    const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined;
+    
+    const isFeaturedParam = searchParams.get('isFeatured');
+    const isFeatured = isFeaturedParam !== null ? isFeaturedParam === 'true' : undefined;
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     const filters: any = {};
+
+    // Always filter for published projects for templates page
+    if (status) {
+      filters.status = status;
+    } else {
+      filters.status = 'published'; // Default to published for templates
+    }
 
     if (category) {
       filters.category = category;
     }
 
-    if (status) {
-      filters.status = status;
+    if (tags && tags.length > 0) {
+      filters.tags = { $in: tags };
+    }
+
+    if (technologies && technologies.length > 0) {
+      filters.technologies = { $in: technologies };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filters.price = {};
+      if (minPrice !== undefined) filters.price.$gte = minPrice;
+      if (maxPrice !== undefined) filters.price.$lte = maxPrice;
+    }
+
+    if (isFeatured === true) {
+      filters.isFeatured = true;
     }
 
     if (search) {
       filters.$or = [
         { title: { $regex: search, $options: 'i' } },
         { shortDescription: { $regex: search, $options: 'i' } },
+        { fullDescription: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } },
+        { technologies: { $in: [new RegExp(search, 'i')] } },
       ];
     }
+
+    const sortOptions: any = {};
+    sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
     const total = await Project.countDocuments(filters);
     const projects = await Project.find(filters)
@@ -37,7 +78,7 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .populate('createdBy', 'name email')
       .populate('updatedBy', 'name email')
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
 
     return NextResponse.json({
       projects,

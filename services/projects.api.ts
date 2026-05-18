@@ -65,7 +65,18 @@ export const createProjectApi = async (data: ProjectFormData): Promise<{ project
 export const getProjectsApi = async (
   page: number = 1,
   limit: number = 10,
-  filters?: { category?: string; search?: string; status?: string }
+  filters?: {
+    category?: string;
+    search?: string;
+    status?: string;
+    tags?: string[];
+    technologies?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    isFeatured?: boolean;
+    sortBy?: 'price' | 'rating' | 'salesCount' | 'createdAt' | 'updatedAt';
+    sortOrder?: 'asc' | 'desc';
+  }
 ): Promise<ProjectsResponse> => {
   try {
     const response = await axiosInstance.get('/projects', {

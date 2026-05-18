@@ -2,7 +2,7 @@ import { UserProtectedRoute } from '@/components/auth';
 import { TemplatesPage } from '@/components/templates';
 import { Suspense } from 'react';
 
-export default function Home() {
+export default function Themes() {
   return (
     <UserProtectedRoute>
       <Suspense fallback={

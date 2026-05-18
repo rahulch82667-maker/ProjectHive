@@ -10,6 +10,24 @@ export interface ProjectsState {
   loading: boolean;
   error: string | null;
   success: boolean;
+  // Templates specific state
+  templatesFilters: {
+    search: string;
+    category: string;
+    tags: string[];
+    technologies: string[];
+    minPrice: number;
+    maxPrice: number;
+    isFeatured: boolean;
+    sortBy: 'price' | 'rating' | 'salesCount' | 'createdAt' | 'updatedAt';
+    sortOrder: 'asc' | 'desc';
+  };
+  availableFilters: {
+    categories: string[];
+    tags: string[];
+    technologies: string[];
+    priceRange: { min: number; max: number };
+  };
 }
 
 const initialState: ProjectsState = {
@@ -21,6 +39,23 @@ const initialState: ProjectsState = {
   loading: false,
   error: null,
   success: false,
+  templatesFilters: {
+    search: '',
+    category: '',
+    tags: [],
+    technologies: [],
+    minPrice: 0,
+    maxPrice: 10000,
+    isFeatured: false,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  },
+  availableFilters: {
+    categories: [],
+    tags: [],
+    technologies: [],
+    priceRange: { min: 0, max: 10000 },
+  },
 };
 
 // Async Thunks
@@ -33,17 +68,32 @@ export const createProject = createAsyncThunk('projects/createProject', async (d
   }
 });
 
-export const fetchProjects = createAsyncThunk(
-  'projects/fetchProjects',
+export const fetchTemplates = createAsyncThunk(
+  'projects/fetchTemplates',
   async (
-    params: { page?: number; limit?: number; category?: string; search?: string; status?: string } = {},
+    params: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      category?: string;
+      tags?: string[];
+      technologies?: string[];
+      minPrice?: number;
+      maxPrice?: number;
+      isFeatured?: boolean;
+      sortBy?: 'price' | 'rating' | 'salesCount' | 'createdAt' | 'updatedAt';
+      sortOrder?: 'asc' | 'desc';
+    } = {},
     { rejectWithValue }
   ) => {
     try {
-      const response = await getProjectsApi(params.page || 1, params.limit || 10, params);
+      const response = await getProjectsApi(params.page || 1, params.limit || 12, {
+        status: 'published',
+        ...params,
+      });
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch projects');
+      return rejectWithValue(error.message || 'Failed to fetch templates');
     }
   }
 );
@@ -85,6 +135,16 @@ const projectsSlice = createSlice({
     clearCurrentProject: (state) => {
       state.currentProject = null;
     },
+    // Templates specific reducers
+    updateTemplatesFilters: (state, action: PayloadAction<Partial<ProjectsState['templatesFilters']>>) => {
+      state.templatesFilters = { ...state.templatesFilters, ...action.payload };
+    },
+    resetTemplatesFilters: (state) => {
+      state.templatesFilters = initialState.templatesFilters;
+    },
+    setAvailableFilters: (state, action: PayloadAction<Partial<ProjectsState['availableFilters']>>) => {
+      state.availableFilters = { ...state.availableFilters, ...action.payload };
+    },
   },
   extraReducers: (builder) => {
     // Create Project
@@ -106,20 +166,20 @@ const projectsSlice = createSlice({
         state.success = false;
       });
 
-    // Fetch Projects
+// Fetch Templates
     builder
-      .addCase(fetchProjects.pending, (state) => {
+      .addCase(fetchTemplates.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProjects.fulfilled, (state, action: PayloadAction<ProjectsResponse>) => {
+      .addCase(fetchTemplates.fulfilled, (state, action: PayloadAction<ProjectsResponse>) => {
         state.loading = false;
         state.projects = action.payload.projects;
         state.totalPages = action.payload.totalPages;
         state.currentPage = action.payload.page;
         state.totalProjects = action.payload.total;
       })
-      .addCase(fetchProjects.rejected, (state, action) => {
+      .addCase(fetchTemplates.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
@@ -169,5 +229,5 @@ const projectsSlice = createSlice({
   },
 });
 
-export const { clearError, clearSuccess, setCurrentProject, clearCurrentProject } = projectsSlice.actions;
+export const { clearError, clearSuccess, setCurrentProject, clearCurrentProject, updateTemplatesFilters, resetTemplatesFilters, setAvailableFilters } = projectsSlice.actions;
 export default projectsSlice.reducer;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, User, LogOut, Heart, Bookmark, LayoutGrid } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 import { RootState } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { logoutApi } from "@/services/auth/auth.api";
@@ -14,12 +15,13 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   
   const dispatch = useDispatch();
   const { isAuthenticated, user, loading } = useSelector((state: RootState) => state.auth);
 
   const navLinks = [
-    { name: "Web Themes & Templates", href: "/themes" },
+    { name: "Web Themes & Templates", href: "/" },
     { name: "Video", href: "/video" },
     { name: "Code", href: "/code" },
     { name: "Photos", href: "/photos" },
@@ -65,15 +67,22 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-gray-600 hover:text-brown-700 font-medium transition-colors text-sm"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href || (link.href === '/' && (pathname === '/' || pathname === '/themes' || pathname === '/templates')) || (link.href !== '/' && pathname.startsWith(link.href));
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`relative font-semibold text-sm transition-all duration-300 py-1.5 border-b-2 ${
+                    isActive 
+                      ? "text-brown-850 border-brown-700 font-bold" 
+                      : "text-gray-500 hover:text-brown-700 border-transparent hover:border-brown-200"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Desktop Actions */}
@@ -180,16 +189,23 @@ const Navbar = () => {
       {isOpen && (
         <div className="lg:hidden bg-white border-b border-gray-100 absolute w-full left-0 animate-in slide-in-from-top duration-300">
           <div className="px-4 pt-2 pb-6 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="block px-3 py-4 text-base font-medium text-gray-700 hover:text-brown-700 hover:bg-brown-50 rounded-md transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href || (link.href === '/' && (pathname === '/' || pathname === '/themes' || pathname === '/templates')) || (link.href !== '/' && pathname.startsWith(link.href));
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`block px-4 py-3 text-base font-semibold rounded-xl transition-all duration-200 ${
+                    isActive 
+                      ? "text-brown-850 bg-brown-50 font-bold" 
+                      : "text-gray-700 hover:text-brown-700 hover:bg-brown-50/50"
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
             <div className="pt-4 border-t border-gray-100 flex flex-col space-y-3 px-3">
               {loading ? (
                 <div className="flex items-center gap-3 px-3 py-4 bg-gray-50 rounded-xl animate-pulse">
