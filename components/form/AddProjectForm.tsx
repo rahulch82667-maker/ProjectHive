@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { createProject } from '@/store/slices/projectsSlice';
+import { createProject, updateProject } from '@/store/slices/projectsSlice';
 import { AppDispatch, RootState } from '@/store/store';
 import { FormInput } from './FormInput';
 import { FormTextarea } from './FormTextarea';
@@ -37,7 +37,7 @@ interface ProjectFormState {
   version: string;
 }
 
-const initialFormState: ProjectFormState = {
+const blankFormState: ProjectFormState = {
   title: '',
   shortDescription: '',
   fullDescription: '',
@@ -85,15 +85,35 @@ const TECHNOLOGIES = [
   { value: 'photoshop', label: 'Photoshop' },
 ];
 
-export const AddProjectForm: React.FC = () => {
+interface AddProjectFormProps {
+  initialValues?: Partial<ProjectFormState>;
+  isEdit?: boolean;
+  projectId?: string;
+}
+
+export const AddProjectForm: React.FC<AddProjectFormProps> = ({
+  initialValues,
+  isEdit = false,
+  projectId,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.projects);
 
-  const [form, setForm] = useState<ProjectFormState>(initialFormState);
+  const [form, setForm] = useState<ProjectFormState>({
+    ...blankFormState,
+    ...initialValues,
+  });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+
+  // Re-hydrate form when initialValues arrive (for edit mode)
+  useEffect(() => {
+    if (initialValues) {
+      setForm({ ...blankFormState, ...initialValues });
+    }
+  }, [initialValues]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as any;
@@ -101,7 +121,6 @@ export const AddProjectForm: React.FC = () => {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
-    // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
@@ -113,7 +132,6 @@ export const AddProjectForm: React.FC = () => {
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-
     if (!form.title.trim()) errors.title = 'Title is required';
     if (!form.shortDescription.trim()) errors.shortDescription = 'Short description is required';
     if (!form.fullDescription.trim()) errors.fullDescription = 'Full description is required';
@@ -122,7 +140,6 @@ export const AddProjectForm: React.FC = () => {
     if (!form.thumbnail) errors.thumbnail = 'Thumbnail is required';
     if (form.discountPercentage < 0 || form.discountPercentage > 100)
       errors.discountPercentage = 'Discount percentage must be between 0 and 100';
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -182,24 +199,26 @@ export const AddProjectForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
-    if (!validateForm()) {
-      return;
-    }
+    const payload = {
+      ...form,
+      price: parseFloat(form.price.toString()),
+      discountPrice: form.discountPrice ? parseFloat(form.discountPrice.toString()) : undefined,
+      discountPercentage: form.discountPercentage
+        ? parseFloat(form.discountPercentage.toString())
+        : undefined,
+    };
 
     try {
-      const result = await dispatch(
-        createProject({
-          ...form,
-          price: parseFloat(form.price.toString()),
-          discountPrice: form.discountPrice ? parseFloat(form.discountPrice.toString()) : undefined,
-          discountPercentage: form.discountPercentage ? parseFloat(form.discountPercentage.toString()) : undefined,
-        })
-      ).unwrap();
-
-      router.push(`/admin/projects`);
+      if (isEdit && projectId) {
+        await dispatch(updateProject({ id: projectId, data: payload })).unwrap();
+      } else {
+        await dispatch(createProject(payload)).unwrap();
+      }
+      router.push('/admin/projects');
     } catch (err: any) {
-      console.error('Failed to create project:', err);
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} project:`, err);
     }
   };
 
@@ -527,7 +546,9 @@ export const AddProjectForm: React.FC = () => {
           disabled={loading}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-6 py-3 font-semibold text-white hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          {loading ? 'Creating...' : 'Create Project'}
+          {loading
+            ? isEdit ? 'Saving...' : 'Creating...'
+            : isEdit ? 'Save Changes' : 'Create Project'}
         </button>
 
         <button

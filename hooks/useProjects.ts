@@ -3,10 +3,12 @@ import { AppDispatch, RootState } from '@/store/store';
 import {
   createProject,
   fetchProjects,
+  fetchProjectById,
   updateProject,
   deleteProject,
   clearError,
   clearSuccess,
+  clearCurrentProject,
 } from '@/store/slices/projectsSlice';
 import { ProjectFormData } from '@/services/projects.api';
 
@@ -30,6 +32,10 @@ export const useProjects = () => {
     return dispatch(fetchProjects(params)).unwrap();
   };
 
+  const loadProjectById = async (id: string) => {
+    return dispatch(fetchProjectById(id)).unwrap();
+  };
+
   const updateExistingProject = async (id: string, data: Partial<ProjectFormData>) => {
     return dispatch(updateProject({ id, data })).unwrap();
   };
@@ -41,6 +47,10 @@ export const useProjects = () => {
   const clear = () => {
     dispatch(clearError());
     dispatch(clearSuccess());
+  };
+
+  const clearProject = () => {
+    dispatch(clearCurrentProject());
   };
 
   return {
@@ -57,8 +67,10 @@ export const useProjects = () => {
     // Methods
     createNewProject,
     loadProjects,
+    loadProjectById,
     updateExistingProject,
     removeProject,
     clear,
+    clearProject,
   };
 };

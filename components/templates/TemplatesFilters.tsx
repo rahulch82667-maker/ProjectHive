@@ -98,15 +98,15 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-brown-100/60 p-6 sticky top-24">
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-brown-50">
+    <div className="p-6 sticky top-24">
+      <div className="flex items-center justify-between mb-6 pb-4">
         <div className="flex items-center gap-2">
-          <Filter className="h-5 w-5 text-brown-600" />
-          <h2 className="text-lg font-bold text-brown-950">Filters</h2>
+          <Filter className="h-5 w-5 text-gray-600" />
+          <h2 className="text-lg font-bold text-gray-900">Filters</h2>
         </div>
         <button
           onClick={onReset}
-          className="flex items-center gap-1 text-sm font-medium text-brown-600 hover:text-brown-800 transition-colors"
+          className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
           Reset
@@ -115,11 +115,11 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
 
       {/* Category Filter */}
       <div className="mb-6">
-        <label className="block text-sm font-bold text-brown-800 mb-2">Category</label>
+        <label className="block text-sm font-bold text-gray-800 mb-2">Category</label>
         <select
           value={filters.category}
           onChange={(e) => onFilterChange({ category: e.target.value })}
-          className="w-full border border-brown-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brown-500 focus:border-transparent bg-white text-brown-900 text-sm shadow-sm transition-all"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white text-gray-900 text-sm shadow-sm transition-all"
         >
           <option value="">All Categories</option>
           {categories.map((category) => (
@@ -130,21 +130,21 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
 
       {/* Price Range */}
       <div className="mb-6">
-        <label className="block text-sm font-bold text-brown-800 mb-2">Price Range</label>
+        <label className="block text-sm font-bold text-gray-800 mb-2">Price Range</label>
         <div className="flex gap-2">
           <input
             type="number"
             placeholder="Min"
             value={filters.minPrice || ''}
             onChange={(e) => onFilterChange({ minPrice: Number(e.target.value) || 0 })}
-            className="w-1/2 border border-brown-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brown-500 focus:border-transparent bg-white text-brown-900 text-sm shadow-sm transition-all"
+            className="w-1/2 border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white text-gray-900 text-sm shadow-sm transition-all"
           />
           <input
             type="number"
             placeholder="Max"
             value={filters.maxPrice || ''}
             onChange={(e) => onFilterChange({ maxPrice: Number(e.target.value) || 10000 })}
-            className="w-1/2 border border-brown-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brown-500 focus:border-transparent bg-white text-brown-900 text-sm shadow-sm transition-all"
+            className="w-1/2 border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white text-gray-900 text-sm shadow-sm transition-all"
           />
         </div>
       </div>
@@ -156,20 +156,20 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
             type="checkbox"
             checked={filters.isFeatured}
             onChange={(e) => onFilterChange({ isFeatured: e.target.checked })}
-            className="rounded border-brown-300 text-brown-700 focus:ring-brown-500 h-4.5 w-4.5 transition-colors cursor-pointer"
+            className="rounded border-gray-300 text-gray-700 focus:ring-gray-500 h-4.5 w-4.5 transition-colors cursor-pointer"
           />
-          <span className="text-sm font-medium text-brown-700 group-hover:text-brown-900 transition-colors">Featured templates only</span>
+          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">Featured templates only</span>
         </label>
       </div>
 
       {/* Sort Options */}
       <div className="mb-6">
-        <label className="block text-sm font-bold text-brown-800 mb-2">Sort By</label>
+        <label className="block text-sm font-bold text-gray-800 mb-2">Sort By</label>
         <div className="flex gap-2">
           <select
             value={filters.sortBy}
             onChange={(e) => onFilterChange({ sortBy: e.target.value as any })}
-            className="flex-1 border border-brown-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brown-500 focus:border-transparent bg-white text-brown-900 text-sm shadow-sm transition-all"
+            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white text-gray-900 text-sm shadow-sm transition-all"
           >
             <option value="createdAt">Newest</option>
             <option value="updatedAt">Recently Updated</option>
@@ -180,7 +180,7 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
           <select
             value={filters.sortOrder}
             onChange={(e) => onFilterChange({ sortOrder: e.target.value as 'asc' | 'desc' })}
-            className="w-20 border border-brown-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brown-500 focus:border-transparent bg-white text-brown-900 text-sm shadow-sm transition-all text-center"
+            className="w-20 border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white text-gray-900 text-sm shadow-sm transition-all text-center"
           >
             <option value="desc">↓</option>
             <option value="asc">↑</option>
@@ -189,15 +189,15 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
       </div>
 
       {/* Technologies Filter */}
-      <div className="mb-6 border-t border-brown-50 pt-4">
+      <div className="mb-6 pt-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center justify-between w-full text-left group"
         >
-          <span className="text-sm font-bold text-brown-800 group-hover:text-brown-900 transition-colors">
+          <span className="text-sm font-bold text-gray-800 group-hover:text-gray-900 transition-colors">
             Technologies ({filters.technologies.length})
           </span>
-          <span className={`transform transition-transform duration-200 text-brown-500 text-xs ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+          <span className={`transform transition-transform duration-200 text-gray-500 text-xs ${isOpen ? 'rotate-180' : ''}`}>▼</span>
         </button>
         {isOpen && (
           <div className="mt-3 max-h-48 overflow-y-auto pr-1">
@@ -208,9 +208,9 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
                     type="checkbox"
                     checked={filters.technologies.includes(tech)}
                     onChange={() => handleTechnologyToggle(tech)}
-                    className="rounded border-brown-300 text-brown-700 focus:ring-brown-500 transition-colors"
+                    className="rounded border-gray-300 text-gray-700 focus:ring-gray-500 transition-colors"
                   />
-                  <span className="text-brown-700 group-hover:text-brown-900 transition-colors">{tech}</span>
+                  <span className="text-gray-700 group-hover:text-gray-900 transition-colors">{tech}</span>
                 </label>
               ))}
             </div>
@@ -219,14 +219,14 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
       </div>
 
       {/* Tags Filter */}
-      <div className="mb-2 border-t border-brown-50 pt-4">
-        <label className="block text-sm font-bold text-brown-800 mb-2">Tags</label>
+      <div className="pt-4">
+        <label className="block text-sm font-bold text-gray-800 mb-2">Tags</label>
         {filters.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {filters.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-brown-50 border border-brown-100 text-brown-800 text-xs rounded-full font-medium shadow-sm transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-50 border border-gray-200 text-gray-800 text-xs rounded-full font-medium shadow-sm transition-all"
               >
                 {tag}
                 <button
@@ -246,7 +246,7 @@ export default function TemplatesFilters({ filters, onFilterChange, onReset }: T
             }
             e.target.value = '';
           }}
-          className="w-full border border-brown-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brown-500 focus:border-transparent bg-white text-brown-900 text-sm shadow-sm transition-all"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white text-gray-900 text-sm shadow-sm transition-all"
         >
           <option value="">Add tag...</option>
           {tags.filter(tag => !filters.tags.includes(tag)).map((tag) => (

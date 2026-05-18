@@ -65,22 +65,19 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     });
   };
 
-  const displayImage =
-    (project.images && project.images.length > 0 ? project.images[0] : null) ||
-    project.thumbnail ||
-    null;
+  const displayImage = project.thumbnail || null;
 
   return (
-    <article className="group relative flex bg-white border border-[#e8ddd4] rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#c8a882] transition-all duration-300">
+    <article className="group relative flex flex-col lg:flex-row bg-white border border-[#e8ddd4] rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#c8a882] transition-all duration-300">
 
       {/* ── Left thumbnail block ─────────────────────────────── */}
-      <div className="relative flex-shrink-0 w-72 overflow-hidden bg-[#f0ebe4]">
+      <div className="relative flex-shrink-0 w-full sm:h-64 lg:h-auto lg:w-64 xl:w-72 overflow-hidden bg-[#f0ebe4]">
         {displayImage ? (
           <Image
             src={displayImage}
             alt={project.title}
             fill
-            sizes="288px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 288px"
             className="object-cover"
           />
         ) : (
@@ -92,8 +89,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         )}
       </div>
 
-      {/* ── Middle content block ──────────────────────────────── */}
-      <div className="flex flex-1 flex-col justify-between p-5 min-w-0">
+      {/* ── Middle content block ─`───────────────────────────────` */}
+      <div className="flex flex-1 flex-col justify-between p-4 sm:p-5 min-w-0">
 
         {/* Title + category */}
         <div>
@@ -103,42 +100,42 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             </span>
           </div>
 
-          <h3 className="text-lg font-bold text-[#3e2723] leading-snug mb-1 line-clamp-1 group-hover:text-[#5d4037] transition-colors">
+          <h3 className="text-base sm:text-lg font-bold text-[#3e2723] leading-snug mb-1 line-clamp-2 group-hover:text-[#5d4037] transition-colors">
             {project.title}
           </h3>
 
-          <p className="text-sm text-[#795548] leading-relaxed line-clamp-2 mb-3">
+          <p className="text-xs sm:text-sm text-[#795548] leading-relaxed line-clamp-3 mb-3">
             {project.shortDescription}
           </p>
 
           {/* Tech / tags bullets — ThemeForest-style */}
-          <ul className="space-y-1 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mb-4">
             {project.technologies?.slice(0, 3).map((tech) => (
-              <li key={tech} className="flex items-center gap-2 text-sm text-[#6d4c41]">
+              <div key={tech} className="flex items-center gap-2 text-xs sm:text-sm text-[#6d4c41] min-w-0">
                 <Cpu className="h-3 w-3 flex-shrink-0 text-[#a1887f]" />
                 <span className="truncate">{tech}</span>
-              </li>
+              </div>
             ))}
             {project.tags?.slice(0, 2).map((tag) => (
-              <li key={tag} className="flex items-center gap-2 text-sm text-[#6d4c41]">
+              <div key={tag} className="flex items-center gap-2 text-xs sm:text-sm text-[#6d4c41] min-w-0">
                 <Tag className="h-3 w-3 flex-shrink-0 text-[#a1887f]" />
                 <span className="truncate">{tag}</span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
 
-        {/* Bottom meta row */}
-        <div className="flex items-center gap-4 text-xs text-[#8d6e63] pt-3 border-t border-[#efebe9]">
+        {/* Bottom meta row - hidden on mobile, shown on desktop */}
+        <div className="hidden sm:flex items-center gap-4 text-xs text-[#8d6e63] pt-3 border-t border-[#efebe9]">
           <span>Last updated: {formatDate(project.updatedAt)}</span>
         </div>
       </div>
 
       {/* ── Right pricing + actions block ─────────────────────── */}
-      <div className="flex flex-shrink-0 flex-col items-end justify-between border-l border-[#efebe9] bg-[#faf8f6] px-6 py-5 w-44">
-
-        {/* Wishlist + Bookmark icons (always visible, top right) */}
-        <div className="flex items-center gap-2 mb-3 self-end">
+      <div className="flex flex-row lg:flex-col items-center justify-between border-t lg:border-t-0 lg:border-l border-[#efebe9] bg-[#faf8f6] p-4 sm:p-5 lg:w-44 lg:px-6 lg:py-5 gap-4 lg:gap-0">
+        
+        {/* Wishlist + Bookmark icons */}
+        <div className="flex items-center gap-2 lg:self-end lg:mb-3">
           <button
             onClick={handleBookmark}
             title="Save"
@@ -163,46 +160,48 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </button>
         </div>
 
-        {/* Price */}
-        <div className="text-center w-full mb-3">
-          <div className="text-2xl font-extrabold text-[#3e2723] leading-none">
-            {formatPrice(project.price)}
-          </div>
-          {project.discountPrice ? (
-            <div className="mt-0.5 text-xs text-[#a1887f] line-through">
-              ${project.discountPrice}
+        {/* Price + Rating Container - Horizontal on mobile/tablet */}
+        <div className="flex-1 flex lg:flex-col items-center justify-between lg:justify-start gap-4 lg:gap-0">
+          {/* Price */}
+          <div className="text-center">
+            <div className="text-xl sm:text-2xl font-extrabold text-[#3e2723] leading-none">
+              {formatPrice(project.price)}
             </div>
-          ) : null}
-        </div>
+            {project.discountPrice ? (
+              <div className="mt-0.5 text-xs text-[#a1887f] line-through">
+                ${project.discountPrice}
+              </div>
+            ) : null}
+          </div>
 
-        {/* Star rating */}
-        <div className="flex flex-col items-center gap-1 mb-4 w-full">
-          <div className="flex items-center gap-0.5">
-            {renderStars(project.rating || 0)}
-          </div>
-          <div className="text-xs text-[#8d6e63]">
-            ({project.totalReviews || 0})
-          </div>
-          <div className="text-xs text-[#8d6e63]">
-            {project.salesCount || 0} Sales
+          {/* Star rating - Hidden meta row shown on mobile */}
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-0.5">
+              {renderStars(project.rating || 0)}
+            </div>
+            <div className="text-xs text-[#8d6e63] whitespace-nowrap">
+              ({project.totalReviews || 0}) • {project.salesCount || 0} Sales
+            </div>
           </div>
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col gap-2 w-full mt-auto">
+        <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-auto">
           <button
             onClick={handleAddToCart}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#5d4037] bg-[#5d4037] px-3 py-2 text-xs font-bold text-white hover:bg-[#4e342e] transition-colors shadow-sm"
+            className="flex flex-1 lg:w-full items-center justify-center gap-1.5 rounded-lg border border-[#5d4037] bg-[#5d4037] px-3 py-2 text-xs font-bold text-white hover:bg-[#4e342e] transition-colors shadow-sm"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
-            Add to Cart
+            <span className="hidden sm:inline">Add to Cart</span>
+            <span className="sm:hidden">Cart</span>
           </button>
           <button
             onClick={handleLivePreview}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#c8a882] bg-transparent px-3 py-2 text-xs font-bold text-[#5d4037] hover:bg-[#efebe9] transition-colors"
+            className="flex flex-1 lg:w-full items-center justify-center gap-1.5 rounded-lg border border-[#c8a882] bg-transparent px-3 py-2 text-xs font-bold text-[#5d4037] hover:bg-[#efebe9] transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            Live Preview
+            <span className="hidden sm:inline">Live Preview</span>
+            <span className="sm:hidden">Preview</span>
           </button>
         </div>
       </div>
