@@ -98,6 +98,34 @@ export const fetchTemplates = createAsyncThunk(
   }
 );
 
+export const fetchProjects = createAsyncThunk(
+  'projects/fetchProjects',
+  async (
+    params: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      category?: string;
+      status?: string;
+      tags?: string[];
+      technologies?: string[];
+      minPrice?: number;
+      maxPrice?: number;
+      isFeatured?: boolean;
+      sortBy?: 'price' | 'rating' | 'salesCount' | 'createdAt' | 'updatedAt';
+      sortOrder?: 'asc' | 'desc';
+    } = {},
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await getProjectsApi(params.page || 1, params.limit || 12, params);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch projects');
+    }
+  }
+);
+
 export const updateProject = createAsyncThunk(
   'projects/updateProject',
   async ({ id, data }: { id: string; data: Partial<ProjectFormData> }, { rejectWithValue }) => {
@@ -180,6 +208,24 @@ const projectsSlice = createSlice({
         state.totalProjects = action.payload.total;
       })
       .addCase(fetchTemplates.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Fetch Projects
+    builder
+      .addCase(fetchProjects.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProjects.fulfilled, (state, action: PayloadAction<ProjectsResponse>) => {
+        state.loading = false;
+        state.projects = action.payload.projects;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.page;
+        state.totalProjects = action.payload.total;
+      })
+      .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
