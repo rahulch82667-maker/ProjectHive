@@ -23,13 +23,23 @@ export default function TemplatesGrid({
 }: TemplatesGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl shadow-sm border border-brown-100 p-6 animate-pulse">
-            <div className="h-48 bg-brown-100/40 rounded-xl mb-4"></div>
-            <div className="h-4 bg-brown-100/40 rounded-lg mb-2"></div>
-            <div className="h-4 bg-brown-100/40 rounded-lg w-3/4 mb-4"></div>
-            <div className="h-10 bg-brown-100/40 rounded-xl"></div>
+      <div className="flex flex-col gap-5">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl border border-[#e8ddd4] flex overflow-hidden animate-pulse" style={{ height: '180px' }}>
+            <div className="w-72 flex-shrink-0 bg-[#efebe9]" />
+            <div className="flex-1 p-5 space-y-3">
+              <div className="h-3 bg-[#efebe9] rounded-lg w-24" />
+              <div className="h-5 bg-[#efebe9] rounded-lg w-3/4" />
+              <div className="h-3 bg-[#efebe9] rounded-lg w-full" />
+              <div className="h-3 bg-[#efebe9] rounded-lg w-5/6" />
+              <div className="h-3 bg-[#efebe9] rounded-lg w-1/3" />
+            </div>
+            <div className="w-44 flex-shrink-0 bg-[#faf8f6] border-l border-[#efebe9] p-5 flex flex-col gap-3">
+              <div className="h-7 bg-[#efebe9] rounded-lg mx-auto w-16" />
+              <div className="h-3 bg-[#efebe9] rounded-lg w-full" />
+              <div className="h-8 bg-[#efebe9] rounded-lg w-full mt-auto" />
+              <div className="h-8 bg-[#efebe9] rounded-lg w-full" />
+            </div>
           </div>
         ))}
       </div>
@@ -66,7 +76,7 @@ export default function TemplatesGrid({
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+      <div className="flex flex-col gap-5 mb-10">
         {projects.map((project) => (
           <ProjectCard key={project._id} project={project} />
         ))}

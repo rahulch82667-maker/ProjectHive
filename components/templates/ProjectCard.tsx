@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, Bookmark, Eye, ShoppingCart, Star } from 'lucide-react';
+import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu } from 'lucide-react';
 import Image from 'next/image';
 import { Project } from '@/services/projects.api';
 
@@ -15,15 +15,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
+      day: '2-digit',
       month: 'short',
-      day: 'numeric'
+      year: '2-digit',
     });
   };
 
-  const formatPrice = (price: number) => {
-    return price === 0 ? 'Free' : `$${price}`;
-  };
+  const formatPrice = (price: number) =>
+    price === 0 ? 'Free' : `$${price}`;
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,115 +44,168 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     console.log('Add to cart:', project._id);
   };
 
-  const handleViewReviews = (e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log('View reviews:', project._id);
+  // Render filled + half + empty stars
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => {
+      const filled = i < Math.floor(rating);
+      const half = !filled && i < rating;
+      return (
+        <span key={i} className="relative inline-block text-[#e8a015]">
+          <Star className="h-3.5 w-3.5 text-[#d4b896]" />
+          {(filled || half) && (
+            <span
+              className="absolute inset-0 overflow-hidden"
+              style={{ width: half ? '55%' : '100%' }}
+            >
+              <Star className="h-3.5 w-3.5 fill-current text-[#e8a015]" />
+            </span>
+          )}
+        </span>
+      );
+    });
   };
 
+  const displayImage =
+    (project.images && project.images.length > 0 ? project.images[0] : null) ||
+    project.thumbnail ||
+    null;
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-row h-48 w-full max-w-full group">
-      {/* Project Image - Left side */}
-      <div className="relative w-56 h-full flex-shrink-0 bg-gray-100 overflow-hidden">
-        {project.images && project.images.length > 0 ? (
+    <article className="group relative flex bg-white border border-[#e8ddd4] rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#c8a882] transition-all duration-300">
+
+      {/* ── Left thumbnail block ─────────────────────────────── */}
+      <div className="relative flex-shrink-0 w-72 overflow-hidden bg-[#f0ebe4]">
+        {displayImage ? (
           <Image
-            src={project.images[0]}
+            src={displayImage}
             alt={project.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="288px"
+            className="object-cover"
           />
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-gray-300">
-              <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
+          <div className="flex h-full items-center justify-center">
+            <svg className="h-14 w-14 text-[#c8a882]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
           </div>
         )}
-
-        {/* Action Buttons */}
-        <div className="absolute top-2 right-2 flex gap-1.5 z-10">
-          <button
-            onClick={handleFavorite}
-            className={`p-1.5 rounded-full transition-all shadow-sm ${
-              isFavorited
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-white/90 backdrop-blur-md text-gray-700 hover:text-red-500 hover:bg-white'
-            }`}
-          >
-            <Heart className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current' : ''}`} />
-          </button>
-          <button
-            onClick={handleBookmark}
-            className={`p-1.5 rounded-full transition-all shadow-sm ${
-              isBookmarked
-                ? 'bg-gray-700 text-white hover:bg-gray-800'
-                : 'bg-white/90 backdrop-blur-md text-gray-700 hover:text-gray-900 hover:bg-white'
-            }`}
-          >
-            <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
-          </button>
-        </div>
       </div>
 
-      {/* Project Content - Right side */}
-      <div className="flex-1 p-5 flex flex-col overflow-hidden min-w-0">
-        {/* Title and Price */}
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-lg font-bold text-gray-900 truncate flex-1 mr-3" title={project.title}>
+      {/* ── Middle content block ──────────────────────────────── */}
+      <div className="flex flex-1 flex-col justify-between p-5 min-w-0">
+
+        {/* Title + category */}
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#8d6e63]">
+              {project.category?.replace(/-/g, ' ')}
+            </span>
+          </div>
+
+          <h3 className="text-lg font-bold text-[#3e2723] leading-snug mb-1 line-clamp-1 group-hover:text-[#5d4037] transition-colors">
             {project.title}
           </h3>
-          <span className="text-xl font-bold text-gray-900 whitespace-nowrap">
+
+          <p className="text-sm text-[#795548] leading-relaxed line-clamp-2 mb-3">
+            {project.shortDescription}
+          </p>
+
+          {/* Tech / tags bullets — ThemeForest-style */}
+          <ul className="space-y-1 mb-4">
+            {project.technologies?.slice(0, 3).map((tech) => (
+              <li key={tech} className="flex items-center gap-2 text-sm text-[#6d4c41]">
+                <Cpu className="h-3 w-3 flex-shrink-0 text-[#a1887f]" />
+                <span className="truncate">{tech}</span>
+              </li>
+            ))}
+            {project.tags?.slice(0, 2).map((tag) => (
+              <li key={tag} className="flex items-center gap-2 text-sm text-[#6d4c41]">
+                <Tag className="h-3 w-3 flex-shrink-0 text-[#a1887f]" />
+                <span className="truncate">{tag}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Bottom meta row */}
+        <div className="flex items-center gap-4 text-xs text-[#8d6e63] pt-3 border-t border-[#efebe9]">
+          <span>Last updated: {formatDate(project.updatedAt)}</span>
+        </div>
+      </div>
+
+      {/* ── Right pricing + actions block ─────────────────────── */}
+      <div className="flex flex-shrink-0 flex-col items-end justify-between border-l border-[#efebe9] bg-[#faf8f6] px-6 py-5 w-44">
+
+        {/* Wishlist + Bookmark icons (always visible, top right) */}
+        <div className="flex items-center gap-2 mb-3 self-end">
+          <button
+            onClick={handleBookmark}
+            title="Save"
+            className={`p-1.5 rounded-lg transition-all ${
+              isBookmarked
+                ? 'bg-[#5d4037] text-white'
+                : 'text-[#a1887f] hover:text-[#5d4037] hover:bg-[#efebe9]'
+            }`}
+          >
+            <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+          </button>
+          <button
+            onClick={handleFavorite}
+            title="Wishlist"
+            className={`p-1.5 rounded-lg transition-all ${
+              isFavorited
+                ? 'bg-red-500 text-white'
+                : 'text-[#a1887f] hover:text-red-500 hover:bg-red-50'
+            }`}
+          >
+            <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
+          </button>
+        </div>
+
+        {/* Price */}
+        <div className="text-center w-full mb-3">
+          <div className="text-2xl font-extrabold text-[#3e2723] leading-none">
             {formatPrice(project.price)}
-          </span>
+          </div>
+          {project.discountPrice ? (
+            <div className="mt-0.5 text-xs text-[#a1887f] line-through">
+              ${project.discountPrice}
+            </div>
+          ) : null}
         </div>
 
-        {/* Short Description */}
-        <p className="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-2">
-          {project.shortDescription}
-        </p>
-
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-          <div className="flex items-center gap-1.5">
-            <Star className="h-4 w-4 fill-current text-amber-500" />
-            <span className="font-semibold text-gray-800">{project.rating || 0}</span>
+        {/* Star rating */}
+        <div className="flex flex-col items-center gap-1 mb-4 w-full">
+          <div className="flex items-center gap-0.5">
+            {renderStars(project.rating || 0)}
           </div>
-          <button
-            onClick={handleViewReviews}
-            className="hover:text-gray-800 transition-colors"
-          >
-            ({project.totalReviews || 0} reviews)
-          </button>
-          <div className="flex items-center gap-1.5">
-            <ShoppingCart className="h-4 w-4 text-gray-500" />
-            <span>{project.salesCount || 0} sales</span>
+          <div className="text-xs text-[#8d6e63]">
+            ({project.totalReviews || 0})
+          </div>
+          <div className="text-xs text-[#8d6e63]">
+            {project.salesCount || 0} Sales
           </div>
         </div>
 
-        {/* Last Updated */}
-        <div className="text-xs text-gray-400 mb-4">
-          Updated {formatDate(project.updatedAt)}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 mt-auto">
-          <button
-            onClick={handleLivePreview}
-            className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg transition-all text-sm font-medium"
-          >
-            <Eye className="h-4 w-4" />
-            Live Preview
-          </button>
+        {/* CTA Buttons */}
+        <div className="flex flex-col gap-2 w-full mt-auto">
           <button
             onClick={handleAddToCart}
-            className="flex-1 flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#5d4037] bg-[#5d4037] px-3 py-2 text-xs font-bold text-white hover:bg-[#4e342e] transition-colors shadow-sm"
           >
-            <ShoppingCart className="h-4 w-4" />
+            <ShoppingCart className="h-3.5 w-3.5" />
             Add to Cart
+          </button>
+          <button
+            onClick={handleLivePreview}
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#c8a882] bg-transparent px-3 py-2 text-xs font-bold text-[#5d4037] hover:bg-[#efebe9] transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Live Preview
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
