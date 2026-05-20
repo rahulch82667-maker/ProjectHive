@@ -46,9 +46,15 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
 // Next.js API Routes compatible protect function
 export const protect = async () => {
-  const { cookies } = await import('next/headers');
+  // Read cookies and headers from the Next.js request context.
+  const { cookies, headers } = await import('next/headers');
   const cookieStore = await cookies();
-  const token = cookieStore.get('access_token')?.value;
+  const headerStore = await headers();
+
+  // Prefer cookie token but fall back to Authorization header if present
+  const tokenFromCookie = cookieStore.get('access_token')?.value;
+  const tokenFromHeader = headerStore.get('authorization')?.replace('Bearer ', '');
+  const token = tokenFromCookie || tokenFromHeader;
 
   if (!token) {
     throw new Error('Not authorized, no token');
