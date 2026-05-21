@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu } from 'lucide-react';
+import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu, X, Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
 import AddToCollectionModal from '@/components/collections/AddToCollectionModal';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,6 +20,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const { isAuthenticated } = useAuth();
   const { collections } = useSelector((state: RootState) => state.collections);
@@ -111,7 +113,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   const handleLivePreview = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.open(project.liveDemoLink || '#', '_blank');
+    setShowPreviewModal(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreviewModal(false);
+    setIsFullscreen(false);
+  };
+
+  const handleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -306,6 +317,99 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
       </article>
+
+      {/* Live Preview Modal with Iframe */}
+      {showPreviewModal && (
+        <div 
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-all duration-300 ${
+            isFullscreen ? 'p-0' : 'p-4 sm:p-6 md:p-8'
+          }`}
+          onClick={handleClosePreview}
+        >
+          <div 
+            className={`bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+              isFullscreen 
+                ? 'w-full h-full rounded-none' 
+                : 'w-full max-w-5xl h-[80vh] sm:h-[85vh] md:h-[90vh]'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between gap-4 p-4 border-b border-brown-200 bg-gradient-to-r from-brown-50 to-white">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-brown-900 truncate">
+                  {project.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-brown-600 truncate">
+                  Live Preview
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleFullscreen}
+                  className="p-2 rounded-lg text-brown-600 hover:text-brown-800 hover:bg-brown-100 transition-all"
+                  title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
+                </button>
+                <button
+                  onClick={handleClosePreview}
+                  className="p-2 rounded-lg text-brown-600 hover:text-red-600 hover:bg-red-50 transition-all"
+                  title="Close"
+                >
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Iframe Content */}
+            <div className="flex-1 bg-gray-100">
+              {project.liveDemoLink ? (
+                <iframe
+                  src={project.liveDemoLink}
+                  title={`${project.title} - Live Preview`}
+                  className="w-full h-full border-0"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
+                  loading="lazy"
+                  allow="fullscreen"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                  <ExternalLink className="h-12 w-12 sm:h-16 sm:w-16 text-brown-300 mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-brown-800 mb-2">
+                    No Preview Available
+                  </h3>
+                  <p className="text-sm sm:text-base text-brown-600 mb-4">
+                    Live demo link is not available for this project.
+                  </p>
+                  {project.liveDemoLink && (
+                    <a
+                      href={project.liveDemoLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-brown-700 text-white rounded-lg hover:bg-brown-800 transition-all"
+                    >
+                      Open in new tab
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 sm:p-4 border-t border-brown-200 bg-brown-50">
+              <p className="text-xs text-brown-600 text-center">
+                This is a live preview of the project. The actual project may vary.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {showCollectionModal && (
         <AddToCollectionModal 
