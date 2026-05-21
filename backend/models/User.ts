@@ -12,6 +12,7 @@ export interface IUser extends Document {
   role: 'user' | 'admin';
   isVerified: boolean;
   isBlocked: boolean;
+  wishlist: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword: (password: string) => Promise<boolean>;
@@ -61,6 +62,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
     isBlocked: {
       type: Boolean,
       default: false,
+    },
+    wishlist: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
+      default: [],
     },
   },
   {

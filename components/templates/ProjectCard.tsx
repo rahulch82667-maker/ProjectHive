@@ -9,6 +9,7 @@ import { Project } from '@/services/projects.api';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store/store';
 import { fetchCollections, removeProjectFromCollection } from '@/store/slices/collectionsSlice';
+import { toggleWishlist } from '@/store/slices/wishlistSlice';
 
 interface ProjectCardProps {
   project: Project;
@@ -16,12 +17,15 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const { isAuthenticated } = useAuth();
   const { collections } = useSelector((state: RootState) => state.collections);
+  const { items: wishlistItems, actionLoading: wishlistActionLoading } = useSelector(
+    (state: RootState) => state.wishlist
+  );
 
   // Check if project is already in any collection
   useEffect(() => {
@@ -32,6 +36,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       setIsBookmarked(isProjectInAnyCollection);
     }
   }, [collections, project._id, isAuthenticated]);
+
+  const isWishlisted = wishlistItems.some((item) => item._id === project._id);
+  const displayedWishlisted = optimisticWishlist !== null ? optimisticWishlist : isWishlisted;
+
+  useEffect(() => {
+    if (!wishlistActionLoading) {
+      setOptimisticWishlist(null);
+    }
+  }, [wishlistActionLoading, isWishlisted]);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -44,9 +57,23 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const formatPrice = (price: number) =>
     price === 0 ? 'Free' : `$${price}`;
 
-  const handleFavorite = (e: React.MouseEvent) => {
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsFavorited(!isFavorited);
+
+    if (!isAuthenticated) {
+      console.log('Please login to save favorites');
+      return;
+    }
+
+    const nextValue = !displayedWishlisted;
+    setOptimisticWishlist(nextValue);
+
+    try {
+      await dispatch(toggleWishlist(project._id)).unwrap();
+    } catch (err) {
+      setOptimisticWishlist(null);
+      console.error('Failed to update wishlist:', err);
+    }
   };
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
@@ -199,27 +226,27 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           {/* Wishlist + Bookmark icons */}
           <div className="flex items-center gap-2 lg:self-end lg:mb-3">
             <button
-              onClick={handleFavorite}
-              title="Add to Wishlist"
+              onClick={handleWishlistToggle}
+              title={displayedWishlisted ? 'Remove from favorites' : 'Add to favorites'}
               className={`p-1.5 rounded-lg transition-all ${
-                isFavorited
+                displayedWishlisted
                   ? 'bg-red-500 text-white'
                   : 'text-[#a1887f] hover:text-red-500 hover:bg-red-50'
-              }`}
+              } ${wishlistActionLoading ? 'opacity-70 cursor-wait' : ''}`}
             >
-              <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
+              <Heart className={`h-4 w-4 ${displayedWishlisted ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={handleBookmarkClick}
               disabled={isRemoving}
               title={
-                isRemoving 
-                  ? 'Removing from collection...' 
-                  : isBookmarked 
-                    ? 'Remove from collection' 
-                    : isAuthenticated 
-                      ? 'Add to collection' 
-                      : 'Login to add to collection'
+                isRemoving
+                  ? 'Removing from collection...'
+                  : isBookmarked
+                  ? 'Remove from collection'
+                  : isAuthenticated
+                  ? 'Add to collection'
+                  : 'Login to add to collection'
               }
               className={`p-1.5 rounded-lg transition-all ${
                 isBookmarked
