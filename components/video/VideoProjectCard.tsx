@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu, X, Maximize2, Minimize2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu, Play, Pause, X, Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
 import AddToCollectionModal from '@/components/collections/AddToCollectionModal';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,11 +11,11 @@ import { RootState, AppDispatch } from '@/store/store';
 import { fetchCollections, removeProjectFromCollection } from '@/store/slices/collectionsSlice';
 import { toggleWishlist } from '@/store/slices/wishlistSlice';
 
-interface ProjectCardProps {
+interface VideoProjectCardProps {
   project: Project;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function VideoProjectCard({ project }: VideoProjectCardProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -24,10 +24,37 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const { isAuthenticated } = useAuth();
+  
   const { collections } = useSelector((state: RootState) => state.collections);
   const { items: wishlistItems, actionLoading: wishlistActionLoading } = useSelector(
     (state: RootState) => state.wishlist
   );
+
+  // Video performance & playing states
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isNearScreen, setIsNearScreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+
+  // Lazy loading the video tag when it enters/approaches viewport
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsNearScreen(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   // Check if project is already in any collection
   useEffect(() => {
@@ -48,20 +75,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     }
   }, [wishlistActionLoading, isWishlisted]);
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: 'short',
-      year: '2-digit',
-    });
-  };
-
   const formatPrice = (price: number) =>
     price === 0 ? 'Free' : `$${price}`;
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
-
     if (!isAuthenticated) {
       console.log('Please login to save favorites');
       return;
@@ -80,7 +98,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    
     if (!isAuthenticated) {
       console.log('Please login to add to collections');
       return;
@@ -136,13 +153,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       const half = !filled && i < rating;
       return (
         <span key={i} className="relative inline-block text-amber-500">
-          <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-300" />
+          <Star className="h-3 w-3 text-brown-200" />
           {(filled || half) && (
             <span
               className="absolute inset-0 overflow-hidden"
               style={{ width: half ? '55%' : '100%' }}
             >
-              <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current text-amber-500" />
+              <Star className="h-3 w-3 fill-current text-amber-500" />
             </span>
           )}
         </span>
@@ -150,7 +167,27 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     });
   };
 
-  const displayImage = project.thumbnail || null;
+  const handleMouseEnter = async () => {
+    if (videoRef.current && !isPlaying) {
+      setIsVideoLoading(true);
+      try {
+        await videoRef.current.play();
+        setIsPlaying(true);
+      } catch (err) {
+        console.warn('Video play was interrupted or blocked:', err);
+      } finally {
+        setIsVideoLoading(false);
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (videoRef.current && isPlaying) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  };
 
   const handleModalClose = () => {
     setShowCollectionModal(false);
@@ -161,157 +198,185 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <>
-      <article className="group relative flex flex-col bg-white border border-brown-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-brown-300 transition-all duration-300">
-        
-        {/* Responsive Layout: Column on mobile, Row on tablet+ */}
-        <div className="flex flex-col md:flex-row">
-          
-          {/* ── Thumbnail Section ── */}
-          <div className="relative w-full md:w-48 lg:w-56 xl:w-64 h-48 sm:h-56 md:h-auto bg-brown-50 flex-shrink-0">
-            {displayImage ? (
+      <article 
+        ref={containerRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="group flex flex-col bg-white border border-brown-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-brown-300 transition-all duration-300 transform hover:-translate-y-1"
+      >
+        {/* ── Top video/thumbnail container (16:9) ───────────────── */}
+        <div className="relative aspect-video w-full bg-brown-50 overflow-hidden select-none cursor-pointer">
+          {isNearScreen && project.demoVideo ? (
+            <>
+              <video
+                ref={videoRef}
+                src={project.demoVideo}
+                poster={project.thumbnail}
+                preload="none"
+                muted
+                playsInline
+                loop
+                className={`w-full h-full object-cover transition-opacity duration-500 ${
+                  isPlaying ? 'opacity-100' : 'opacity-90'
+                }`}
+              />
+              {/* Playback Indicators */}
+              {!isPlaying && !isVideoLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors pointer-events-none">
+                  <div className="bg-white/95 text-brown-900 p-3 rounded-full shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                    <Play className="h-5 w-5 fill-current text-brown-700" />
+                  </div>
+                </div>
+              )}
+              {isVideoLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[1px] pointer-events-none">
+                  <div className="h-8 w-8 rounded-full border-2 border-brown-200 border-t-brown-700 animate-spin" />
+                </div>
+              )}
+              {isPlaying && (
+                <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-md font-medium tracking-wider uppercase pointer-events-none flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                  Preview
+                </div>
+              )}
+            </>
+          ) : (
+            // static poster if not near screen
+            project.thumbnail ? (
               <Image
-                src={displayImage}
+                src={project.thumbnail}
                 alt={project.title}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 256px"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 384px"
+                className="object-cover"
+                loading="lazy"
               />
             ) : (
               <div className="flex h-full items-center justify-center">
-                <svg className="h-12 w-12 sm:h-14 sm:w-14 text-brown-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg className="h-12 w-12 text-brown-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
-            )}
-            
-            {/* Mobile-only category badge */}
-            <div className="absolute top-2 left-2 md:hidden">
-              <span className="inline-block bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold uppercase tracking-wide text-brown-700 shadow-sm">
-                {project.category?.replace(/-/g, ' ')}
-              </span>
-            </div>
-          </div>
+            )
+          )}
+        </div>
 
-          {/* ── Content Section ── */}
-          <div className="flex-1 flex flex-col p-4 sm:p-5">
-            
-            {/* Desktop category */}
-            <div className="hidden md:block mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-brown-600">
-                {project.category?.replace(/-/g, ' ')}
-              </span>
+        {/* ── Card Content ─────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col justify-between p-4 min-w-0 bg-white">
+          <div className="mb-3">
+            {/* Category */}
+            <div className="text-[10px] font-bold uppercase tracking-wider text-brown-500 mb-1">
+              {project.category?.replace(/-/g, ' ')}
             </div>
 
-            <h3 className="text-base sm:text-lg md:text-xl font-bold text-brown-900 leading-tight mb-2 line-clamp-2 group-hover:text-brown-700 transition-colors">
+            {/* Title */}
+            <h3 className="text-sm sm:text-base font-bold text-brown-900 leading-snug line-clamp-1 group-hover:text-brown-700 transition-colors">
               {project.title}
             </h3>
 
-            <p className="text-xs sm:text-sm text-brown-600 leading-relaxed line-clamp-2 md:line-clamp-3 mb-3">
+            {/* Short Description */}
+            <p className="text-xs text-brown-600 line-clamp-2 mt-1 mb-2 leading-relaxed">
               {project.shortDescription}
             </p>
 
-            {/* Technologies & Tags - Responsive grid */}
-            <div className="grid grid-cols-2 gap-1.5 mb-4">
-              {project.technologies?.slice(0, 3).map((tech) => (
-                <div key={tech} className="flex items-center gap-1.5 text-xs sm:text-sm text-brown-700 min-w-0">
-                  <Cpu className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0 text-brown-400" />
-                  <span className="truncate">{tech}</span>
-                </div>
+            {/* Technologies / Tags */}
+            <div className="flex flex-wrap gap-1">
+              {project.tags?.slice(0, 3).map((tag) => (
+                <span 
+                  key={tag} 
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-brown-600 bg-brown-50 px-2 py-0.5 rounded-md border border-brown-100/50"
+                >
+                  <Tag className="h-2.5 w-2.5 text-brown-300" />
+                  {tag}
+                </span>
               ))}
-              {project.tags?.slice(0, 2).map((tag) => (
-                <div key={tag} className="flex items-center gap-1.5 text-xs sm:text-sm text-brown-700 min-w-0">
-                  <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0 text-brown-400" />
-                  <span className="truncate">{tag}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Meta info - hidden on smallest screens */}
-            <div className="hidden sm:flex items-center gap-4 text-xs text-brown-500 pt-3 border-t border-brown-100">
-              <span>Updated: {formatDate(project.updatedAt)}</span>
             </div>
           </div>
 
-          {/* ── Actions Section ── */}
-          <div className="flex md:flex-col items-center justify-between gap-3 p-4 sm:p-5 border-t md:border-t-0 md:border-l border-brown-100 bg-brown-50/50 md:w-auto lg:w-52">
-            
-            {/* Action Icons Row */}
-            <div className="flex items-center gap-2 md:self-end">
+          {/* Pricing & rating block */}
+          <div className="pt-3 border-t border-brown-50 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs text-brown-400 font-medium">Price</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-base sm:text-lg font-black text-brown-900 leading-none">
+                  {formatPrice(project.price)}
+                </span>
+                {project.discountPrice ? (
+                  <span className="text-xs text-brown-300 line-through">
+                    ${project.discountPrice}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Star rating */}
+            <div className="flex flex-col items-end gap-0.5">
+              <div className="flex items-center gap-0.5">
+                {renderStars(project.rating || 0)}
+              </div>
+              <span className="text-[10px] text-brown-500">
+                ({project.totalReviews || 0}) • {project.salesCount || 0} sales
+              </span>
+            </div>
+          </div>
+
+          {/* ── Actions Row ────────────────────────────────────────── */}
+          <div className="mt-3 flex gap-2">
+            {/* Wishlist & Collection Icon buttons */}
+            <div className="flex gap-1.5">
               <button
                 onClick={handleWishlistToggle}
                 title={displayedWishlisted ? 'Remove from favorites' : 'Add to favorites'}
-                className={`p-2 rounded-lg transition-all ${
+                className={`p-2 rounded-xl transition-all border ${
                   displayedWishlisted
-                    ? 'bg-red-500 text-white hover:bg-red-600'
-                    : 'text-brown-500 hover:text-red-500 hover:bg-red-50'
+                    ? 'bg-red-500 text-white border-red-500 shadow-sm shadow-red-100'
+                    : 'text-brown-400 border-brown-100 hover:text-red-500 hover:bg-red-50/50 hover:border-red-100'
                 } ${wishlistActionLoading ? 'opacity-70 cursor-wait' : ''}`}
               >
-                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${displayedWishlisted ? 'fill-current' : ''}`} />
+                <Heart className={`h-4 w-4 ${displayedWishlisted ? 'fill-current' : ''}`} />
               </button>
+              
               <button
                 onClick={handleBookmarkClick}
                 disabled={isRemoving}
                 title={
                   isRemoving
-                    ? 'Removing from collection...'
+                    ? 'Removing...'
                     : isBookmarked
                     ? 'Remove from collection'
                     : isAuthenticated
                     ? 'Add to collection'
                     : 'Login to add to collection'
                 }
-                className={`p-2 rounded-lg transition-all ${
+                className={`p-2 rounded-xl transition-all border ${
                   isBookmarked
-                    ? 'bg-brown-700 text-white hover:bg-brown-800'
-                    : 'text-brown-500 hover:text-brown-700 hover:bg-brown-100'
+                    ? 'bg-brown-700 text-white border-brown-700 shadow-sm shadow-brown-100 hover:bg-brown-800'
+                    : 'text-brown-400 border-brown-100 hover:text-brown-700 hover:bg-brown-50/50 hover:border-brown-200'
                 } ${isRemoving ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isRemoving ? (
-                  <div className="h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : (
-                  <Bookmark className={`h-4 w-4 sm:h-5 sm:w-5 ${isBookmarked ? 'fill-current' : ''}`} />
+                  <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
                 )}
               </button>
             </div>
 
-            {/* Price & Rating */}
-            <div className="flex-1 flex md:flex-col items-center justify-between md:justify-start gap-3 md:gap-2">
-              <div className="text-center">
-                <div className="text-lg sm:text-xl md:text-2xl font-extrabold text-brown-900 leading-none">
-                  {formatPrice(project.price)}
-                </div>
-                {project.discountPrice && (
-                  <div className="text-xs text-brown-500 line-through">
-                    ${project.discountPrice}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col items-center gap-0.5">
-                <div className="flex items-center gap-0.5">
-                  {renderStars(project.rating || 0)}
-                </div>
-                <div className="text-xs text-brown-600 whitespace-nowrap">
-                  ({project.totalReviews || 0}) • {project.salesCount || 0} sales
-                </div>
-              </div>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto">
+            {/* Cart & Preview CTA buttons */}
+            <div className="flex-1 flex gap-1.5">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 md:w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-brown-700 px-3 py-2 text-xs sm:text-sm font-bold text-white hover:bg-brown-800 transition-all shadow-sm"
+                className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-brown-700 hover:bg-brown-800 text-white text-xs font-bold transition-all shadow-sm hover:shadow-md cursor-pointer py-2"
               >
-                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Add to Cart</span>
+                <ShoppingCart className="h-3 w-3" />
+                Cart
               </button>
               <button
                 onClick={handleLivePreview}
-                className="flex-1 md:w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-brown-300 bg-white px-3 py-2 text-xs sm:text-sm font-bold text-brown-700 hover:bg-brown-50 transition-all"
+                className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-brown-200 hover:border-brown-300 text-brown-700 hover:text-brown-800 text-xs font-bold transition-colors py-2"
               >
-                <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Preview</span>
+                <ExternalLink className="h-3 w-3" />
+                Preview
               </button>
             </div>
           </div>
@@ -373,9 +438,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   src={project.liveDemoLink}
                   title={`${project.title} - Live Preview`}
                   className="w-full h-full border-0"
-                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads allow-modals"
                   loading="lazy"
-                  allow="fullscreen"
+                  allow="fullscreen; autoplay; encrypted-media"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center p-6">
@@ -383,20 +449,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   <h3 className="text-lg sm:text-xl font-semibold text-brown-800 mb-2">
                     No Preview Available
                   </h3>
-                  <p className="text-sm sm:text-base text-brown-600 mb-4">
+                  <p className="text-sm sm:text-base text-brown-600">
                     Live demo link is not available for this project.
                   </p>
-                  {project.liveDemoLink && (
-                    <a
-                      href={project.liveDemoLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-brown-700 text-white rounded-lg hover:bg-brown-800 transition-all"
-                    >
-                      Open in new tab
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
                 </div>
               )}
             </div>
@@ -410,7 +465,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
       )}
-      
+
       {showCollectionModal && (
         <AddToCollectionModal 
           project={project} 

@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
     
     const isFeaturedParam = searchParams.get('isFeatured');
     const isFeatured = isFeaturedParam !== null ? isFeaturedParam === 'true' : undefined;
+    const hasVideoParam = searchParams.get('hasVideo');
+    const hasVideo = hasVideoParam !== null ? hasVideoParam === 'true' : undefined;
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
@@ -57,6 +59,10 @@ export async function GET(request: NextRequest) {
 
     if (isFeatured === true) {
       filters.isFeatured = true;
+    }
+
+    if (hasVideo === true) {
+      filters.demoVideo = { $ne: null, $exists: true };
     }
 
     if (search) {
