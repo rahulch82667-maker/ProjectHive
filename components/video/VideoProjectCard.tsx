@@ -1,0 +1,478 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu, Play, Pause, X, Maximize2, Minimize2 } from 'lucide-react';
+import Image from 'next/image';
+import AddToCollectionModal from '@/components/collections/AddToCollectionModal';
+import { useAuth } from '@/hooks/useAuth';
+import { Project } from '@/services/projects.api';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '@/store/store';
+import { fetchCollections, removeProjectFromCollection } from '@/store/slices/collectionsSlice';
+import { toggleWishlist } from '@/store/slices/wishlistSlice';
+
+interface VideoProjectCardProps {
+  project: Project;
+}
+
+export default function VideoProjectCard({ project }: VideoProjectCardProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const { isAuthenticated } = useAuth();
+  
+  const { collections } = useSelector((state: RootState) => state.collections);
+  const { items: wishlistItems, actionLoading: wishlistActionLoading } = useSelector(
+    (state: RootState) => state.wishlist
+  );
+
+  // Video performance & playing states
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isNearScreen, setIsNearScreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+
+  // Lazy loading the video tag when it enters/approaches viewport
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsNearScreen(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  // Check if project is already in any collection
+  useEffect(() => {
+    if (isAuthenticated && collections.length > 0) {
+      const isProjectInAnyCollection = collections.some(collection => 
+        collection.projects.includes(project._id)
+      );
+      setIsBookmarked(isProjectInAnyCollection);
+    }
+  }, [collections, project._id, isAuthenticated]);
+
+  const isWishlisted = wishlistItems.some((item) => item._id === project._id);
+  const displayedWishlisted = optimisticWishlist !== null ? optimisticWishlist : isWishlisted;
+
+  useEffect(() => {
+    if (!wishlistActionLoading) {
+      setOptimisticWishlist(null);
+    }
+  }, [wishlistActionLoading, isWishlisted]);
+
+  const formatPrice = (price: number) =>
+    price === 0 ? 'Free' : `$${price}`;
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      console.log('Please login to save favorites');
+      return;
+    }
+
+    const nextValue = !displayedWishlisted;
+    setOptimisticWishlist(nextValue);
+
+    try {
+      await dispatch(toggleWishlist(project._id)).unwrap();
+    } catch (err) {
+      setOptimisticWishlist(null);
+      console.error('Failed to update wishlist:', err);
+    }
+  };
+
+  const handleBookmarkClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      console.log('Please login to add to collections');
+      return;
+    }
+    
+    if (isBookmarked) {
+      setIsRemoving(true);
+      try {
+        const collectionContainingProject = collections.find(collection => 
+          collection.projects.includes(project._id)
+        );
+        
+        if (collectionContainingProject) {
+          await dispatch(removeProjectFromCollection({ 
+            collectionId: collectionContainingProject._id, 
+            projectId: project._id 
+          })).unwrap();
+          setIsBookmarked(false);
+          dispatch(fetchCollections());
+        }
+      } catch (err: any) {
+        console.error('Failed to remove project from collection:', err);
+      } finally {
+        setIsRemoving(false);
+      }
+    } else {
+      setShowCollectionModal(true);
+    }
+  };
+
+  const handleLivePreview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowPreviewModal(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreviewModal(false);
+    setIsFullscreen(false);
+  };
+
+  const handleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Add to cart:', project._id);
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => {
+      const filled = i < Math.floor(rating);
+      const half = !filled && i < rating;
+      return (
+        <span key={i} className="relative inline-block text-amber-500">
+          <Star className="h-3 w-3 text-brown-200" />
+          {(filled || half) && (
+            <span
+              className="absolute inset-0 overflow-hidden"
+              style={{ width: half ? '55%' : '100%' }}
+            >
+              <Star className="h-3 w-3 fill-current text-amber-500" />
+            </span>
+          )}
+        </span>
+      );
+    });
+  };
+
+  const handleMouseEnter = async () => {
+    if (videoRef.current && !isPlaying) {
+      setIsVideoLoading(true);
+      try {
+        await videoRef.current.play();
+        setIsPlaying(true);
+      } catch (err) {
+        console.warn('Video play was interrupted or blocked:', err);
+      } finally {
+        setIsVideoLoading(false);
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (videoRef.current && isPlaying) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowCollectionModal(false);
+    if (isAuthenticated) {
+      dispatch(fetchCollections());
+    }
+  };
+
+  return (
+    <>
+      <article 
+        ref={containerRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="group flex flex-col bg-white border border-brown-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-brown-300 transition-all duration-300 transform hover:-translate-y-1"
+      >
+        {/* ── Top video/thumbnail container (16:9) ───────────────── */}
+        <div className="relative aspect-video w-full bg-brown-50 overflow-hidden select-none cursor-pointer">
+          {isNearScreen && project.demoVideo ? (
+            <>
+              <video
+                ref={videoRef}
+                src={project.demoVideo}
+                poster={project.thumbnail}
+                preload="none"
+                muted
+                playsInline
+                loop
+                className={`w-full h-full object-cover transition-opacity duration-500 ${
+                  isPlaying ? 'opacity-100' : 'opacity-90'
+                }`}
+              />
+              {/* Playback Indicators */}
+              {!isPlaying && !isVideoLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors pointer-events-none">
+                  <div className="bg-white/95 text-brown-900 p-3 rounded-full shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                    <Play className="h-5 w-5 fill-current text-brown-700" />
+                  </div>
+                </div>
+              )}
+              {isVideoLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[1px] pointer-events-none">
+                  <div className="h-8 w-8 rounded-full border-2 border-brown-200 border-t-brown-700 animate-spin" />
+                </div>
+              )}
+              {isPlaying && (
+                <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-md font-medium tracking-wider uppercase pointer-events-none flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                  Preview
+                </div>
+              )}
+            </>
+          ) : (
+            // static poster if not near screen
+            project.thumbnail ? (
+              <Image
+                src={project.thumbnail}
+                alt={project.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 384px"
+                className="object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <svg className="h-12 w-12 text-brown-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* ── Card Content ─────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col justify-between p-4 min-w-0 bg-white">
+          <div className="mb-3">
+            {/* Category */}
+            <div className="text-[10px] font-bold uppercase tracking-wider text-brown-500 mb-1">
+              {project.category?.replace(/-/g, ' ')}
+            </div>
+
+            {/* Title */}
+            <h3 className="text-sm sm:text-base font-bold text-brown-900 leading-snug line-clamp-1 group-hover:text-brown-700 transition-colors">
+              {project.title}
+            </h3>
+
+            {/* Short Description */}
+            <p className="text-xs text-brown-600 line-clamp-2 mt-1 mb-2 leading-relaxed">
+              {project.shortDescription}
+            </p>
+
+            {/* Technologies / Tags */}
+            <div className="flex flex-wrap gap-1">
+              {project.tags?.slice(0, 3).map((tag) => (
+                <span 
+                  key={tag} 
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-brown-600 bg-brown-50 px-2 py-0.5 rounded-md border border-brown-100/50"
+                >
+                  <Tag className="h-2.5 w-2.5 text-brown-300" />
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Pricing & rating block */}
+          <div className="pt-3 border-t border-brown-50 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs text-brown-400 font-medium">Price</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-base sm:text-lg font-black text-brown-900 leading-none">
+                  {formatPrice(project.price)}
+                </span>
+                {project.discountPrice ? (
+                  <span className="text-xs text-brown-300 line-through">
+                    ${project.discountPrice}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Star rating */}
+            <div className="flex flex-col items-end gap-0.5">
+              <div className="flex items-center gap-0.5">
+                {renderStars(project.rating || 0)}
+              </div>
+              <span className="text-[10px] text-brown-500">
+                ({project.totalReviews || 0}) • {project.salesCount || 0} sales
+              </span>
+            </div>
+          </div>
+
+          {/* ── Actions Row ────────────────────────────────────────── */}
+          <div className="mt-3 flex gap-2">
+            {/* Wishlist & Collection Icon buttons */}
+            <div className="flex gap-1.5">
+              <button
+                onClick={handleWishlistToggle}
+                title={displayedWishlisted ? 'Remove from favorites' : 'Add to favorites'}
+                className={`p-2 rounded-xl transition-all border ${
+                  displayedWishlisted
+                    ? 'bg-red-500 text-white border-red-500 shadow-sm shadow-red-100'
+                    : 'text-brown-400 border-brown-100 hover:text-red-500 hover:bg-red-50/50 hover:border-red-100'
+                } ${wishlistActionLoading ? 'opacity-70 cursor-wait' : ''}`}
+              >
+                <Heart className={`h-4 w-4 ${displayedWishlisted ? 'fill-current' : ''}`} />
+              </button>
+              
+              <button
+                onClick={handleBookmarkClick}
+                disabled={isRemoving}
+                title={
+                  isRemoving
+                    ? 'Removing...'
+                    : isBookmarked
+                    ? 'Remove from collection'
+                    : isAuthenticated
+                    ? 'Add to collection'
+                    : 'Login to add to collection'
+                }
+                className={`p-2 rounded-xl transition-all border ${
+                  isBookmarked
+                    ? 'bg-brown-700 text-white border-brown-700 shadow-sm shadow-brown-100 hover:bg-brown-800'
+                    : 'text-brown-400 border-brown-100 hover:text-brown-700 hover:bg-brown-50/50 hover:border-brown-200'
+                } ${isRemoving ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isRemoving ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                )}
+              </button>
+            </div>
+
+            {/* Cart & Preview CTA buttons */}
+            <div className="flex-1 flex gap-1.5">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-brown-700 hover:bg-brown-800 text-white text-xs font-bold transition-all shadow-sm hover:shadow-md cursor-pointer py-2"
+              >
+                <ShoppingCart className="h-3 w-3" />
+                Cart
+              </button>
+              <button
+                onClick={handleLivePreview}
+                className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-brown-200 hover:border-brown-300 text-brown-700 hover:text-brown-800 text-xs font-bold transition-colors py-2"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      {/* Live Preview Modal with Iframe */}
+      {showPreviewModal && (
+        <div 
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-all duration-300 ${
+            isFullscreen ? 'p-0' : 'p-4 sm:p-6 md:p-8'
+          }`}
+          onClick={handleClosePreview}
+        >
+          <div 
+            className={`bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+              isFullscreen 
+                ? 'w-full h-full rounded-none' 
+                : 'w-full max-w-5xl h-[80vh] sm:h-[85vh] md:h-[90vh]'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between gap-4 p-4 border-b border-brown-200 bg-gradient-to-r from-brown-50 to-white">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-brown-900 truncate">
+                  {project.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-brown-600 truncate">
+                  Live Preview
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleFullscreen}
+                  className="p-2 rounded-lg text-brown-600 hover:text-brown-800 hover:bg-brown-100 transition-all"
+                  title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
+                </button>
+                <button
+                  onClick={handleClosePreview}
+                  className="p-2 rounded-lg text-brown-600 hover:text-red-600 hover:bg-red-50 transition-all"
+                  title="Close"
+                >
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Iframe Content */}
+            <div className="flex-1 bg-gray-100">
+              {project.liveDemoLink ? (
+                <iframe
+                  src={project.liveDemoLink}
+                  title={`${project.title} - Live Preview`}
+                  className="w-full h-full border-0"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads allow-modals"
+                  loading="lazy"
+                  allow="fullscreen; autoplay; encrypted-media"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                  <ExternalLink className="h-12 w-12 sm:h-16 sm:w-16 text-brown-300 mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-brown-800 mb-2">
+                    No Preview Available
+                  </h3>
+                  <p className="text-sm sm:text-base text-brown-600">
+                    Live demo link is not available for this project.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 sm:p-4 border-t border-brown-200 bg-brown-50">
+              <p className="text-xs text-brown-600 text-center">
+                This is a live preview of the project. The actual project may vary.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCollectionModal && (
+        <AddToCollectionModal 
+          project={project} 
+          open={showCollectionModal} 
+          onClose={handleModalClose} 
+        />
+      )}
+    </>
+  );
+}

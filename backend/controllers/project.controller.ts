@@ -100,7 +100,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
 
 export const getProjects = async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 10, category, search, status } = req.query;
+    const { page = 1, limit = 10, category, search, status, hasVideo } = req.query;
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     const filters: any = {};
@@ -111,6 +111,10 @@ export const getProjects = async (req: Request, res: Response) => {
 
     if (status) {
       filters.status = status;
+    }
+
+    if (hasVideo === 'true') {
+      filters.demoVideo = { $ne: null, $exists: true };
     }
 
     if (search) {

@@ -74,6 +74,7 @@ export const getProjectsApi = async (
     minPrice?: number;
     maxPrice?: number;
     isFeatured?: boolean;
+    hasVideo?: boolean;
     sortBy?: 'price' | 'rating' | 'salesCount' | 'createdAt' | 'updatedAt';
     sortOrder?: 'asc' | 'desc';
   }
