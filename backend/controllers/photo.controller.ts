@@ -108,3 +108,52 @@ export const getPhotos = async (req: Request, res: Response) => {
     return res.status(500).json({ message: error.message || 'Failed to fetch photos' });
   }
 };
+
+// Update an existing photo (admin only)
+export const updatePhoto = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const id = req.params.id as string;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid photo ID' });
+    }
+    const { title, description, imageUrl, price, tags, technologies } = req.body;
+    const updated = await Photo.findByIdAndUpdate(
+      id,
+      { title, description, imageUrl, price, tags, technologies, updatedBy: userId },
+      { new: true, runValidators: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ message: 'Photo not found' });
+    }
+    return res.json({ message: 'Photo updated', photo: updated });
+  } catch (error: any) {
+    console.error('Update photo error:', error);
+    return res.status(500).json({ message: error.message || 'Failed to update photo' });
+  }
+};
+
+// Delete a photo (admin only)
+export const deletePhoto = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const id = req.params.id as string;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid photo ID' });
+    }
+    const deleted = await Photo.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Photo not found' });
+    }
+    return res.json({ message: 'Photo deleted' });
+  } catch (error: any) {
+    console.error('Delete photo error:', error);
+    return res.status(500).json({ message: error.message || 'Failed to delete photo' });
+  }
+};
