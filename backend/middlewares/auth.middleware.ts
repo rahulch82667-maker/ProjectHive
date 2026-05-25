@@ -18,10 +18,8 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     }
 
     try {
-      // Verify token
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'secret_access') as { id: string };
 
-      // Get user from db
       const user = await User.findById(decoded.id).select('-password');
 
       if (!user) {
@@ -46,12 +44,10 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
 // Next.js API Routes compatible protect function
 export const protect = async () => {
-  // Read cookies and headers from the Next.js request context.
   const { cookies, headers } = await import('next/headers');
   const cookieStore = await cookies();
   const headerStore = await headers();
 
-  // Prefer cookie token but fall back to Authorization header if present
   const tokenFromCookie = cookieStore.get('access_token')?.value;
   const tokenFromHeader = headerStore.get('authorization')?.replace('Bearer ', '');
   const token = tokenFromCookie || tokenFromHeader;
@@ -82,4 +78,14 @@ export const protect = async () => {
     console.error('Auth middleware error:', error);
     throw new Error('Not authorized, token failed');
   }
+};
+
+
+// Add this to your existing auth middleware
+export const adminOnly = async () => {
+  const user = await protect();
+  if (user.role !== 'admin') {
+    throw new Error('Admin access required');
+  }
+  return user;
 };

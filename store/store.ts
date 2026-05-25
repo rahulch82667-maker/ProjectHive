@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import projectsReducer from './slices/projectsSlice';
 import collectionsReducer from './slices/collectionsSlice';
 import wishlistReducer from './slices/wishlistSlice';
+import photosReducer from './slices/photosSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     projects: projectsReducer,
     collections: collectionsReducer,
     wishlist: wishlistReducer,
+    photos: photosReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
 });

@@ -2,24 +2,27 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { logoutUser } from '@/store/slices/authSlice';
 import { logoutApi } from '@/services/auth/auth.api';
-import { LayoutDashboard, Users2, FolderOpen, ShieldCheck, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users2, FolderOpen, ShieldCheck, LogOut, Image as ImageIcon } from 'lucide-react';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Users', href: '/admin/users', icon: Users2 },
   { label: 'Projects', href: '/admin/projects', icon: FolderOpen },
+  { label: 'Photos', href: '/admin/photos', icon: ImageIcon },
   { label: 'Security', href: '/admin/security', icon: ShieldCheck },
 ];
 
 export default function AdminSidebar() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
@@ -29,7 +32,6 @@ export default function AdminSidebar() {
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
-      // Fallback: clear local auth state and redirect anyway
       dispatch(logoutUser());
       router.push('/login');
     }
@@ -53,13 +55,22 @@ export default function AdminSidebar() {
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="group flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-semibold text-slate-700 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-900"
+              className={`group flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-semibold transition-colors duration-200 ${
+                isActive
+                  ? 'bg-amber-50 text-amber-700'
+                  : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+              }`}
             >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 group-hover:bg-amber-50 group-hover:text-amber-700">
+              <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl transition-colors duration-200 ${
+                isActive
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-slate-100 text-slate-600 group-hover:bg-amber-50 group-hover:text-amber-700'
+              }`}>
                 <Icon size={18} />
               </span>
               <span>{item.label}</span>

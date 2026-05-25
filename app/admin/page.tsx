@@ -4,11 +4,12 @@ import { AdminProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/hooks/useAuth';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminStatCard from '@/components/admin/AdminStatCard';
-import { Users2, Activity, DollarSign } from 'lucide-react';
+import { Users2, Activity, DollarSign, Camera } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AdminPage() {
   const { user } = useAuth();
-
+  
   return (
     <AdminProtectedRoute>
       <AdminLayout user={user ?? undefined}>
@@ -51,6 +52,37 @@ export default function AdminPage() {
                 description="Compared to last month"
                 icon={<DollarSign size={22} />}
               />
+            </div>
+
+            {/* Quick Links */}
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Link
+                  href="/admin/photos"
+                  className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-amber-200 hover:bg-amber-50 transition-all group"
+                >
+                  <div className="p-2 rounded-lg bg-amber-100 text-amber-700 group-hover:bg-amber-200">
+                    <Camera className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Manage Photos</p>
+                    <p className="text-xs text-slate-500">Add, edit, or remove photos</p>
+                  </div>
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-amber-200 hover:bg-amber-50 transition-all group"
+                >
+                  <div className="p-2 rounded-lg bg-amber-100 text-amber-700 group-hover:bg-amber-200">
+                    <Users2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Manage Users</p>
+                    <p className="text-xs text-slate-500">View and manage user accounts</p>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
 
