@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Heart, Bookmark, Star, ShoppingCart, ExternalLink, Tag, Cpu } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import AddToCollectionModal from '@/components/collections/AddToCollectionModal';
 import IframePreviewModal from '@/components/ui/IframePreviewModal';
 import { useAuth } from '@/hooks/useAuth';
@@ -153,7 +154,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex flex-col md:flex-row">
           
           {/* ── Thumbnail Section ── */}
-          <div className="relative w-full md:w-48 lg:w-56 xl:w-64 h-48 sm:h-56 md:h-auto bg-brown-50 flex-shrink-0">
+          <Link href={`/projects/${project.slug}`} className="relative w-full md:w-48 lg:w-56 xl:w-64 h-48 sm:h-56 md:h-auto bg-brown-50 flex-shrink-0 block overflow-hidden cursor-pointer">
             {displayImage ? (
               <Image
                 src={displayImage}
@@ -176,7 +177,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 {project.category?.replace(/-/g, ' ')}
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* ── Content Section ── */}
           <div className="flex-1 flex flex-col p-4 sm:p-5">
@@ -188,9 +189,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               </span>
             </div>
 
-            <h3 className="text-base sm:text-lg md:text-xl font-bold text-brown-900 leading-tight mb-2 line-clamp-2 group-hover:text-brown-700 transition-colors">
-              {project.title}
-            </h3>
+            <Link href={`/projects/${project.slug}`} className="block">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-brown-900 leading-tight mb-2 line-clamp-2 group-hover:text-brown-700 transition-colors cursor-pointer">
+                {project.title}
+              </h3>
+            </Link>
 
             <p className="text-xs sm:text-sm text-brown-600 leading-relaxed line-clamp-2 md:line-clamp-3 mb-3">
               {project.shortDescription}

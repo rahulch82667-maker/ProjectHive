@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Project, ProjectFormData, ProjectsResponse, createProjectApi, getProjectsApi, getProjectByIdApi, updateProjectApi, deleteProjectApi } from '@/services/projects.api';
+import { Project, ProjectFormData, ProjectsResponse, createProjectApi, getProjectsApi, getProjectByIdApi, getProjectBySlugApi, updateProjectApi, deleteProjectApi } from '@/services/projects.api';
 
 export interface ProjectsState {
   projects: Project[];
@@ -28,6 +28,9 @@ export interface ProjectsState {
     technologies: string[];
     priceRange: { min: number; max: number };
   };
+  pdpLoading: boolean;
+  pdpError: string | null;
+  projectCache: Record<string, Project>;
 }
 
 const initialState: ProjectsState = {
@@ -56,6 +59,9 @@ const initialState: ProjectsState = {
     technologies: [],
     priceRange: { min: 0, max: 10000 },
   },
+  pdpLoading: false,
+  pdpError: null,
+  projectCache: {},
 };
 
 // Async Thunks
@@ -131,6 +137,18 @@ export const fetchProjectById = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const project = await getProjectByIdApi(id);
+      return project;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch project');
+    }
+  }
+);
+
+export const fetchProjectBySlug = createAsyncThunk(
+  'projects/fetchBySlug',
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const project = await getProjectBySlugApi(slug);
       return project;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch project');
@@ -299,6 +317,23 @@ const projectsSlice = createSlice({
       .addCase(fetchProjectById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      });
+
+    // Fetch Project By Slug
+    builder
+      .addCase(fetchProjectBySlug.pending, (state) => {
+        state.pdpLoading = true;
+        state.pdpError = null;
+        state.currentProject = null;
+      })
+      .addCase(fetchProjectBySlug.fulfilled, (state, action: PayloadAction<Project>) => {
+        state.pdpLoading = false;
+        state.currentProject = action.payload;
+        state.projectCache[action.payload.slug] = action.payload;
+      })
+      .addCase(fetchProjectBySlug.rejected, (state, action) => {
+        state.pdpLoading = false;
+        state.pdpError = action.payload as string;
       });
   },
 });
