@@ -289,12 +289,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             {/* CTA Buttons */}
             <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto">
               <button
-                className="flex-1 md:w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-brown-700 px-3 py-2 text-xs sm:text-sm font-bold text-white hover:bg-brown-800 transition-all shadow-sm"
-              >
-                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Add to Cart</span>
-              </button>
-              <button
                 onClick={handleLivePreview}
                 className="flex-1 md:w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-brown-300 bg-white px-3 py-2 text-xs sm:text-sm font-bold text-brown-700 hover:bg-brown-50 transition-all"
               >

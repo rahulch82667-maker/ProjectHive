@@ -24,8 +24,7 @@ export default function PricingCard({ project }: PricingCardProps) {
   };
 
   const handleBuyNow = () => {
-    // Buy Now: redirect to checkout or show purchase modal
-    alert('Simulated purchase integration. Redirecting to checkout...');
+    window.location.href = `/checkout?projectId=${project._id}`;
   };
 
   // Determine Stock Status

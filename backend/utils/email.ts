@@ -1,26 +1,34 @@
 import nodemailer from 'nodemailer';
 
-interface EmailOptions {
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer | string;
+  contentType?: string;
+}
+
+export interface EmailOptions {
   email: string;
   subject: string;
   message: string;
+  html?: string;
+  attachments?: EmailAttachment[];
 }
 
 export const sendEmail = async (options: EmailOptions) => {
   const transporter = nodemailer.createTransport({
-    service: 'gmail', // You can change this to your preferred service
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
   });
 
-  const mailOptions = {
+  const mailOptions: any = {
     from: `"ProjectHive Support" <${process.env.EMAIL_USER}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
-    html: `
+    html: options.html || `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
         <h2 style="color: #3b1f0a; text-align: center;">ProjectHive Password Reset</h2>
         <p style="font-size: 16px; color: #555;">Hello,</p>
@@ -34,6 +42,10 @@ export const sendEmail = async (options: EmailOptions) => {
       </div>
     `,
   };
+
+  if (options.attachments && options.attachments.length > 0) {
+    mailOptions.attachments = options.attachments;
+  }
 
   await transporter.sendMail(mailOptions);
 };

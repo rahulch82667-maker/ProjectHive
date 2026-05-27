@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Prevent Next.js from bundling server-only native packages
+  serverExternalPackages: ['nodemailer', 'mongoose', 'bcrypt'],
   images: {
     remotePatterns: [
       {

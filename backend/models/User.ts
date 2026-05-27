@@ -13,6 +13,7 @@ export interface IUser extends Document {
   isVerified: boolean;
   isBlocked: boolean;
   wishlist: mongoose.Types.ObjectId[];
+  purchasedProjects: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword: (password: string) => Promise<boolean>;
@@ -64,6 +65,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
       default: false,
     },
     wishlist: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
+      default: [],
+    },
+    purchasedProjects: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
       default: [],
     },
