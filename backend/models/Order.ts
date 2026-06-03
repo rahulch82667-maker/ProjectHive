@@ -19,9 +19,12 @@ export interface IOrder extends Document {
   projectId: mongoose.Types.ObjectId;
   billingDetails: IBillingDetails;
   amount: number;
-  status: 'pending' | 'paid' | 'failed';
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  accessStatus: 'pending' | 'approved' | 'rejected';
   stripeSessionId: string;
   emailsSent?: boolean;
+  approvedAt?: Date;
+  rejectedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,9 +61,15 @@ const orderSchema: Schema<IOrder> = new mongoose.Schema(
       required: [true, 'Amount is required'],
       min: [0, 'Amount cannot be negative'],
     },
-    status: {
+    paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+      index: true,
+    },
+    accessStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
       default: 'pending',
       index: true,
     },
@@ -73,6 +82,12 @@ const orderSchema: Schema<IOrder> = new mongoose.Schema(
     emailsSent: {
       type: Boolean,
       default: false,
+    },
+    approvedAt: {
+      type: Date,
+    },
+    rejectedAt: {
+      type: Date,
     },
   },
   {

@@ -44,6 +44,7 @@ export default function ProjectDetailsClient({ slug }: ProjectDetailsClientProps
       dispatch(setCurrentProject(projectCache[slug]));
     } else {
       dispatch(fetchProjectBySlug(slug));
+      console.log(fetchProjectBySlug(slug))
     }
 
     // Cleanup on unmount or slug change
