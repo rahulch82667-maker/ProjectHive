@@ -35,6 +35,7 @@ interface ProjectFormState {
   requirements: string[];
   fileSize: string;
   version: string;
+  zipUrl: string; // GitHub Release download URL
 }
 
 const blankFormState: ProjectFormState = {
@@ -59,6 +60,7 @@ const blankFormState: ProjectFormState = {
   requirements: [],
   fileSize: '',
   version: '',
+  zipUrl: '',
 };
 
 const CATEGORIES = [
@@ -115,7 +117,9 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
     }
   }, [initialValues]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target as any;
     setForm((prev) => ({
       ...prev,
@@ -140,6 +144,8 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
     if (!form.thumbnail) errors.thumbnail = 'Thumbnail is required';
     if (form.discountPercentage < 0 || form.discountPercentage > 100)
       errors.discountPercentage = 'Discount percentage must be between 0 and 100';
+    if (form.zipUrl && !/^https?:\/\/.+/.test(form.zipUrl))
+      errors.zipUrl = 'Please enter a valid URL starting with http:// or https://';
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -208,6 +214,7 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
       discountPercentage: form.discountPercentage
         ? parseFloat(form.discountPercentage.toString())
         : undefined,
+      zipUrl: form.zipUrl.trim() || undefined,
     };
 
     try {
@@ -429,22 +436,36 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
 
       {/* Additional Information */}
       <FormSection title="Additional Information">
-        <FormInput
-          id="fileSize"
-          name="fileSize"
-          label="File Size"
-          placeholder="e.g., 250 MB"
-          value={form.fileSize}
-          onChange={handleInputChange}
-        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormInput
+            id="fileSize"
+            name="fileSize"
+            label="File Size"
+            placeholder="e.g., 250 MB"
+            value={form.fileSize}
+            onChange={handleInputChange}
+          />
+
+          <FormInput
+            id="version"
+            name="version"
+            label="Version"
+            placeholder="1.0.0"
+            value={form.version}
+            onChange={handleInputChange}
+          />
+        </div>
 
         <FormInput
-          id="version"
-          name="version"
-          label="Version"
-          placeholder="1.0.0"
-          value={form.version}
+          id="zipUrl"
+          name="zipUrl"
+          label="ZIP File URL"
+          type="url"
+          placeholder="https://github.com/your-org/your-repo/releases/download/v1.0.0/project.zip"
+          value={form.zipUrl}
           onChange={handleInputChange}
+          error={validationErrors.zipUrl}
+          helpText="Paste the direct .zip download link from a GitHub Release. This is what users will download from their My Projects page."
         />
 
         <FormTagsInput

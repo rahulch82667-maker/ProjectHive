@@ -22,6 +22,7 @@ export interface ProjectFormData {
   requirements: string[];
   fileSize?: string;
   version?: string;
+  zipUrl?: string; 
 }
 
 export interface Project extends ProjectFormData {

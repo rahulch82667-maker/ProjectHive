@@ -36,6 +36,7 @@ export async function GET() {
           thumbnail: project.thumbnail,
           price: project.price,
           slug: project.slug,
+          zipUrl: project.zipUrl ?? null,
           purchaseDate: order?.createdAt || new Date(),
           orderId: order?._id,
         };

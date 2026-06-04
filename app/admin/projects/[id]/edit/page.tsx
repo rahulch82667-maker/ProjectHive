@@ -54,6 +54,7 @@ export default function EditProjectPage() {
         requirements: currentProject.requirements ?? [],
         fileSize: currentProject.fileSize ?? '',
         version: currentProject.version ?? '',
+        zipUrl: currentProject.zipUrl ?? '',
       }
     : undefined;
 

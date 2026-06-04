@@ -78,6 +78,7 @@ export async function PUT(
       requirements,
       fileSize,
       version,
+      zipUrl,
     } = body;
 
     if (title) {
@@ -110,6 +111,7 @@ export async function PUT(
     if (requirements) project.requirements = requirements;
     if (fileSize) project.fileSize = fileSize;
     if (version) project.version = version;
+    if (zipUrl !== undefined) project.zipUrl = zipUrl;
 
     project.updatedBy = user._id;
 

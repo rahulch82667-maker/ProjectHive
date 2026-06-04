@@ -1,12 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Search, Download, Clock, CheckCircle, FolderOpen, Calendar, Tag, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
-import MainLayout from '@/components/layout/MainLayout';
-import Container from '@/components/layout/Container';
-import api from '@/services/api/axios';
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Download,
+  Clock,
+  CheckCircle,
+  FolderOpen,
+  Calendar,
+  Tag,
+  Loader2,
+} from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import MainLayout from "@/components/layout/MainLayout";
+import Container from "@/components/layout/Container";
+import api from "@/services/api/axios";
 
 interface PurchasedProject {
   _id: string;
@@ -16,6 +25,7 @@ interface PurchasedProject {
   thumbnail: string;
   price: number;
   slug: string;
+  zipUrl?: string | null;
   purchaseDate: string;
   orderId: string;
 }
@@ -24,7 +34,7 @@ export default function MyProjectsPage() {
   const { user, isAuthenticated } = useAuth();
   const [projects, setProjects] = useState<PurchasedProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -35,25 +45,26 @@ export default function MyProjectsPage() {
   const fetchPurchasedProjects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/users/purchased-projects');
+      const response = await api.get("/users/purchased-projects");
       setProjects(response.data.projects);
     } catch (error) {
-      console.error('Failed to fetch purchased projects:', error);
+      console.error("Failed to fetch purchased projects:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProjects = projects.filter(project =>
-    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProjects = projects.filter(
+    (project) =>
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.category.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -64,9 +75,16 @@ export default function MyProjectsPage() {
           <Container className="py-20 text-center">
             <div className="max-w-md mx-auto">
               <FolderOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign in Required</h2>
-              <p className="text-gray-600 mb-6">Please sign in to view your purchased projects.</p>
-              <Link href="/login" className="inline-block px-6 py-3 bg-brown-700 text-white rounded-lg hover:bg-brown-800">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Sign in Required
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Please sign in to view your purchased projects.
+              </p>
+              <Link
+                href="/login"
+                className="inline-block px-6 py-3 bg-brown-700 text-white rounded-lg hover:bg-brown-800"
+              >
                 Sign In
               </Link>
             </div>
@@ -82,7 +100,9 @@ export default function MyProjectsPage() {
         <Container className="py-8 sm:py-12">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">My Projects</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              My Projects
+            </h1>
             <p className="text-gray-600">
               Access all your approved purchased projects and downloads.
             </p>
@@ -92,12 +112,16 @@ export default function MyProjectsPage() {
           <div className="bg-gradient-to-r from-brown-700 to-brown-800 rounded-2xl p-6 mb-8 text-white">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <p className="text-brown-200 text-sm">Total Purchased Projects</p>
+                <p className="text-brown-200 text-sm">
+                  Total Purchased Projects
+                </p>
                 <p className="text-3xl font-bold mt-1">{projects.length}</p>
               </div>
               <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
                 <CheckCircle className="h-5 w-5" />
-                <span className="text-sm font-semibold">All projects approved</span>
+                <span className="text-sm font-semibold">
+                  All projects approved
+                </span>
               </div>
             </div>
           </div>
@@ -118,7 +142,10 @@ export default function MyProjectsPage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 animate-pulse">
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 animate-pulse"
+                >
                   <div className="aspect-video bg-gray-200" />
                   <div className="p-5 space-y-3">
                     <div className="h-5 bg-gray-200 rounded w-3/4" />
@@ -133,12 +160,19 @@ export default function MyProjectsPage() {
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-200">
               <FolderOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No projects found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No projects found
+              </h3>
               <p className="text-gray-600 max-w-sm mx-auto">
-                {searchTerm ? 'No projects match your search criteria.' : 'You haven\'t purchased any projects yet.'}
+                {searchTerm
+                  ? "No projects match your search criteria."
+                  : "You haven't purchased any projects yet."}
               </p>
               {!searchTerm && (
-                <Link href="/templates" className="inline-block mt-6 px-6 py-3 bg-brown-700 text-white rounded-lg hover:bg-brown-800">
+                <Link
+                  href="/templates"
+                  className="inline-block mt-6 px-6 py-3 bg-brown-700 text-white rounded-lg hover:bg-brown-800"
+                >
                   Browse Marketplace
                 </Link>
               )}
@@ -158,7 +192,8 @@ export default function MyProjectsPage() {
                       alt={project.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
+                        (e.target as HTMLImageElement).src =
+                          "/images/placeholder.jpg";
                       }}
                     />
                     <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-semibold bg-green-500/90 text-white">
@@ -174,7 +209,9 @@ export default function MyProjectsPage() {
 
                     <div className="flex items-center gap-2">
                       <Tag className="h-3.5 w-3.5 text-gray-400" />
-                      <span className="text-xs font-medium text-gray-600">{project.category}</span>
+                      <span className="text-xs font-medium text-gray-600">
+                        {project.category}
+                      </span>
                     </div>
 
                     <p className="text-sm text-gray-600 line-clamp-2">
@@ -195,12 +232,27 @@ export default function MyProjectsPage() {
                       >
                         View Details
                       </Link>
-                      <button
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brown-700 hover:bg-brown-800 text-white text-sm font-semibold rounded-xl transition-all"
-                      >
-                        <Download className="h-4 w-4" />
-                        Download
-                      </button>
+                      {project.zipUrl ? (
+                        <a
+                          href={project.zipUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brown-700 hover:bg-brown-800 text-white text-sm font-semibold rounded-xl transition-all"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download
+                        </a>
+                      ) : (
+                        <button
+                          disabled
+                          title="Download not available yet"
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 text-sm font-semibold rounded-xl cursor-not-allowed"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

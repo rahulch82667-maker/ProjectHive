@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
       requirements,
       fileSize,
       version,
+      zipUrl,
     } = await request.json();
 
     if (!title || !shortDescription || !fullDescription || price === undefined || !category || !thumbnail) {
@@ -165,6 +166,7 @@ export async function POST(request: NextRequest) {
       requirements: requirements || [],
       fileSize,
       version,
+      zipUrl,
       createdBy: user._id,
       updatedBy: user._id,
     });

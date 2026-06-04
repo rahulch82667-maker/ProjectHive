@@ -31,6 +31,7 @@ export interface IProject extends Document {
   requirements: string[];
   fileSize?: string;
   version?: string;
+  zipUrl?: string;
   changelog: Array<{ version: string; date: Date; notes: string }>;
   createdAt: Date;
   updatedAt: Date;
@@ -154,6 +155,7 @@ const projectSchema: Schema<IProject> = new mongoose.Schema(
     requirements: [{ type: String }],
     fileSize: { type: String },
     version: { type: String },
+    zipUrl: { type: String },
     changelog: [
       {
         version: { type: String },
@@ -180,6 +182,10 @@ const projectSchema: Schema<IProject> = new mongoose.Schema(
 //   }
 //   next();
 // });
+
+if (process.env.NODE_ENV === 'development') {
+  delete (mongoose.models as any).Project;
+}
 
 const Project: Model<IProject> = mongoose.models.Project || mongoose.model('Project', projectSchema);
 

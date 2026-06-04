@@ -33,6 +33,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
       requirements,
       fileSize,
       version,
+      zipUrl,
     } = req.body;
 
     // Validate required fields
@@ -80,6 +81,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
       requirements: requirements || [],
       fileSize,
       version,
+      zipUrl,
       createdBy: userId,
       updatedBy: userId,
     });
@@ -215,6 +217,7 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
       requirements,
       fileSize,
       version,
+      zipUrl,
     } = req.body;
 
     if (title) {
@@ -247,7 +250,8 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     if (requirements) project.requirements = requirements;
     if (fileSize) project.fileSize = fileSize;
     if (version) project.version = version;
-
+    if (zipUrl !== undefined) project.zipUrl = zipUrl;
+    
     project.updatedBy = userId;
 
     const updatedProject = await project.save();
