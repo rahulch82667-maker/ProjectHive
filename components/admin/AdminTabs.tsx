@@ -1,18 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import PhotoUploadForm from './PhotoUploadForm';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store/store';
-import { fetchPhotos } from '@/store/slices/photosSlice';
 
 export default function AdminTabs() {
   const dispatch = useDispatch<AppDispatch>();
   const [activeTab, setActiveTab] = useState<'upload' | 'manage'>('upload');
 
-  const handleUploadSuccess = () => {
-    dispatch(fetchPhotos({ page: 1, limit: 12 }));
-  };
 
   return (
     <div className="space-y-6">
@@ -41,7 +36,6 @@ export default function AdminTabs() {
 
       {activeTab === 'upload' ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <PhotoUploadForm onSuccess={handleUploadSuccess} />
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
