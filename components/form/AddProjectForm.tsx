@@ -158,13 +158,12 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
   };
 
   const handleImagesUpload = (files: CloudinaryUploadResponse | CloudinaryUploadResponse[]) => {
-    if (Array.isArray(files)) {
-      setForm((prev) => ({
-        ...prev,
-        images: files.map((f) => f.secure_url),
-      }));
-      setUploadingImages(false);
-    }
+    const urls = Array.isArray(files) ? files.map((f) => f.secure_url) : [files.secure_url];
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, ...urls],
+    }));
+    setUploadingImages(false);
   };
 
   const handleDemoVideoUpload = (file: CloudinaryUploadResponse | CloudinaryUploadResponse[]) => {
@@ -383,15 +382,29 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
 
         {form.images.length > 0 && (
           <div className="mt-2">
-            <p className="text-xs text-slate-600 mb-2">Uploaded images:</p>
-            <div className="grid gap-2 grid-cols-4">
+            <p className="text-xs text-slate-600 mb-2">Uploaded images (hover to remove):</p>
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-6">
               {form.images.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`Project ${idx}`}
-                  className="h-20 w-20 rounded-lg object-cover"
-                />
+                <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                  <img
+                    src={img}
+                    alt={`Project ${idx}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({
+                      ...prev,
+                      images: prev.images.filter((_, i) => i !== idx)
+                    }))}
+                    className="absolute top-1 right-1 rounded-full bg-rose-600 p-1.5 text-white opacity-0 group-hover:opacity-100 transition shadow hover:bg-rose-700"
+                    title="Remove image"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -405,6 +418,29 @@ export const AddProjectForm: React.FC<AddProjectFormProps> = ({
           resourceType="video"
           helpText="Upload a demo video showcasing your project"
         />
+
+        {form.demoVideo && (
+          <div className="mt-2 space-y-2">
+            <p className="text-xs text-slate-600">Selected Video Preview:</p>
+            <div className="relative w-full max-w-md rounded-lg overflow-hidden border border-slate-200 bg-slate-900 aspect-video flex items-center justify-center">
+              <video
+                src={form.demoVideo}
+                controls
+                className="w-full h-full object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, demoVideo: '' }))}
+                className="absolute top-2 right-2 rounded-full bg-rose-600 p-1.5 text-white hover:bg-rose-700 transition shadow"
+                title="Remove video"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         <FormInput
           id="liveDemoLink"

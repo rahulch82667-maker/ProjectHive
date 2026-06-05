@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useId } from 'react';
 import { Folder } from 'lucide-react';
 import { uploadToCloudinary, CloudinaryUploadResponse } from '@/services/cloudinary.service';
 
@@ -35,7 +35,10 @@ export const FormFileUpload: React.FC<FormFileUploadProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [internalUploading, setInternalUploading] = useState(false);
+  const fileInputId = useId();
 
+  const isUploading = uploading || internalUploading;
   const effectiveMaxSize = maxSize ?? (resourceType === 'video' ? 100 : 10);
 
   const handleUpload = useCallback(
@@ -57,6 +60,7 @@ export const FormFileUpload: React.FC<FormFileUploadProps> = ({
         return;
       }
 
+      setInternalUploading(true);
       try {
         if (multiple) {
           const uploadPromises = validFiles.map((file) =>
@@ -75,6 +79,8 @@ export const FormFileUpload: React.FC<FormFileUploadProps> = ({
         const message = error?.message || 'Upload failed';
         console.error('Upload failed:', error);
         setUploadError(message);
+      } finally {
+        setInternalUploading(false);
       }
     },
     [multiple, onChange, effectiveMaxSize, folder, resourceType]
@@ -121,23 +127,23 @@ export const FormFileUpload: React.FC<FormFileUploadProps> = ({
             : error
               ? 'border-rose-300 bg-rose-50'
               : 'border-slate-300 bg-slate-50'
-        } ${uploading || disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        } ${isUploading || disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <input
           type="file"
           multiple={multiple}
           accept={accept}
           onChange={handleFileInputChange}
-          disabled={uploading || disabled}
+          disabled={isUploading || disabled}
           className="hidden"
-          id={`file-upload-${Date.now()}`}
+          id={fileInputId}
         />
-        <label htmlFor={`file-upload-${Date.now()}`} className="cursor-pointer">
+        <label htmlFor={fileInputId} className="cursor-pointer">
           <div className="space-y-2">
             <div className="flex justify-center">
               <Folder className="h-12 w-12 text-slate-400" />
             </div>
-            {uploading ? (
+            {isUploading ? (
               <div>
                 <p className="font-medium text-slate-700">Uploading...</p>
               </div>
@@ -160,4 +166,4 @@ export const FormFileUpload: React.FC<FormFileUploadProps> = ({
       )}
     </div>
   );
-};
+};

@@ -1,4 +1,5 @@
 import api from './api/axios';
+import axios from 'axios';
 
 export interface CloudinaryUploadResponse {
   public_id: string;
@@ -26,31 +27,45 @@ export const uploadToCloudinary = async (
   file: File,
   options: UploadOptions = {}
 ): Promise<CloudinaryUploadResponse> => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  if (options.folder) {
-    formData.append('folder', options.folder);
-  }
-
-  if (options.resource_type) {
-    formData.append('resource_type', options.resource_type);
-  }
-
-  if (options.tags && options.tags.length > 0) {
-    formData.append('tags', options.tags.join(','));
-  }
+  const resourceType = options.resource_type || 'auto';
 
   try {
-    const response = await api.post('/cloudinary/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    // 1. Get signed signature from our Next.js API
+    const signResponse = await api.post('/cloudinary/sign', {
+      folder: options.folder,
+      resource_type: resourceType,
     });
+
+    const { signature, timestamp, apiKey, cloudName } = signResponse.data;
+
+    // 2. Upload directly to Cloudinary
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', apiKey);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
+
+    if (options.folder) {
+      formData.append('folder', options.folder);
+    }
+
+    if (options.tags && options.tags.length > 0) {
+      formData.append('tags', options.tags.join(','));
+    }
+
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
 
     return response.data;
   } catch (error: any) {
-    console.error('Cloudinary upload error:', error);
+    console.error('Cloudinary client-side upload error:', error);
     throw error.response?.data || error;
   }
 };
