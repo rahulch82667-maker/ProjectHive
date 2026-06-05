@@ -3,9 +3,9 @@ import authReducer from './slices/authSlice';
 import projectsReducer from './slices/projectsSlice';
 import collectionsReducer from './slices/collectionsSlice';
 import wishlistReducer from './slices/wishlistSlice';
-import photosReducer from './slices/photosSlice';
 import cartReducer from './slices/cartSlice';
 import checkoutReducer from './slices/checkoutSlice';
+import profileReducer from './slices/profileSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,9 +13,9 @@ export const store = configureStore({
     projects: projectsReducer,
     collections: collectionsReducer,
     wishlist: wishlistReducer,
-    photos: photosReducer,
     cart: cartReducer,
     checkout: checkoutReducer,
+    profile: profileReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
 });

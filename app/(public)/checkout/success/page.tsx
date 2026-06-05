@@ -32,7 +32,7 @@ function CheckoutSuccessPageContent() {
       return () => clearTimeout(timer);
     }
     if (countdown === 0) {
-      router.push('/collections');
+      router.push('/my-projects');
     }
   }, [emailStatus, countdown, router]);
 
@@ -215,7 +215,7 @@ function CheckoutSuccessPageContent() {
                   <div>
                     <p className="font-semibold text-gray-800">Access Your Purchase</p>
                     <p className="text-sm text-gray-600 mt-0.5">
-                      Go to your Collections page to download your purchased files instantly.
+                      Go to your My Projects page to download your purchased files instantly.
                     </p>
                   </div>
                 </div>
@@ -225,11 +225,11 @@ function CheckoutSuccessPageContent() {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Link
-                href="/collections"
+                href="/my-projects"
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg cursor-pointer group"
               >
                 <Download className="h-4 w-4 group-hover:animate-bounce" />
-                Go to My Collections
+                Go to My Projects
               </Link>
               
               <Link

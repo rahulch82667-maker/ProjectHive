@@ -33,7 +33,6 @@ const Navbar = () => {
   const navLinks = [
     { name: "Web Themes & Templates", href: "/" },
     { name: "Video", href: "/video" },
-    { name: "Photos", href: "/photos" },
   ];
 
   const handleLogout = async () => {
