@@ -18,12 +18,14 @@ import { RootState } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { logoutApi } from "@/services/auth/auth.api";
 import Container from "./Container";
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   const dispatch = useDispatch();
   const { isAuthenticated, user, loading } = useSelector(
@@ -40,9 +42,11 @@ const Navbar = () => {
       await logoutApi();
       dispatch(logoutUser());
       setIsProfileOpen(false);
+      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
       dispatch(logoutUser());
+      router.push("/login");
     }
   };
 

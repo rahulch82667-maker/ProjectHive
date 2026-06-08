@@ -50,7 +50,7 @@ export async function PATCH(request: NextRequest) {
       : { $addToSet: { wishlist: projectId } };
 
     await User.findByIdAndUpdate(user._id, updateQuery, {
-      new: true,
+      returnDocument: 'after',
     });
 
     const updatedUser = await User.findById(user._id).select('wishlist');
