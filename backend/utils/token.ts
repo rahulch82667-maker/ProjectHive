@@ -6,7 +6,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'secret_refresh
 
 export const generateAccessToken = (userId: string) => {
   return jwt.sign({ id: userId }, ACCESS_TOKEN_SECRET, {
-    expiresIn: '15m',
+    expiresIn: '7d',
   });
 };
 
@@ -22,8 +22,6 @@ export const sendTokenCookies = async (userId: string) => {
 
   const cookieStore = await cookies();
 
-  // CRITICAL: In production (Vercel), use 'none' with secure: true for HTTPS
-  // Locally, can use 'lax' with secure: false for HTTP
   const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
   
   // Define sameSite value with proper type
@@ -36,10 +34,10 @@ export const sendTokenCookies = async (userId: string) => {
     path: '/',
   };
 
-  // Access token cookie (expires in 15m)
+  // Access token cookie 
   cookieStore.set('access_token', accessToken, {
     ...cookieOptions,
-    maxAge: 15 * 60, // Next.js cookies use seconds for maxAge sometimes, but it's fine
+    maxAge: 7 * 24 * 60 * 60, 
   });
 
   // Refresh token cookie (expires in 7d)
