@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { fetchTemplates, updateTemplatesFilters, resetTemplatesFilters } from '@/store/slices/projectsSlice';
@@ -17,6 +17,7 @@ export default function TemplatesPage() {
   );
 
   const [debouncedSearch, setDebouncedSearch] = useState(templatesFilters.search);
+  const autoClearedRef = useRef(false);
 
   // Debounce search input
   useEffect(() => {
@@ -37,6 +38,28 @@ export default function TemplatesPage() {
       ...templatesFilters,
     }));
   }, [dispatch, templatesFilters]);
+
+  // Auto-clear filters when no projects match the current filters
+  useEffect(() => {
+    if (!loading && projects.length === 0 && !error) {
+      const hasActiveFilters =
+        templatesFilters.search !== '' ||
+        templatesFilters.category !== '' ||
+        templatesFilters.tags.length > 0 ||
+        templatesFilters.technologies.length > 0 ||
+        templatesFilters.minPrice > 0 ||
+        templatesFilters.maxPrice < 10000 ||
+        templatesFilters.isFeatured;
+
+      if (hasActiveFilters && !autoClearedRef.current) {
+        autoClearedRef.current = true;
+        dispatch(resetTemplatesFilters());
+        setDebouncedSearch('');
+      }
+    } else if (projects.length > 0) {
+      autoClearedRef.current = false;
+    }
+  }, [loading, projects.length, templatesFilters, dispatch, error]);
 
   const handlePageChange = (page: number) => {
     dispatch(fetchTemplates({
