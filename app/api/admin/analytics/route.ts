@@ -5,6 +5,26 @@ import Order from '@/backend/models/Order';
 import { User } from '@/backend/models/User';
 import Project from '@/backend/models/Project';
 
+// ── Helper: compute average response time (in hours) for access requests ──
+function computeAvgResponseTime(orders: any[]): number {
+  const decided = orders.filter(
+    (o) => o.accessStatus === 'approved' || o.accessStatus === 'rejected'
+  );
+  if (decided.length === 0) return 0;
+
+  const totalHours = decided.reduce((sum: number, o: any) => {
+    const start = new Date(o.createdAt).getTime();
+    const end = o.approvedAt
+      ? new Date(o.approvedAt).getTime()
+      : o.rejectedAt
+      ? new Date(o.rejectedAt).getTime()
+      : start;
+    return sum + (end - start) / (1000 * 60 * 60);
+  }, 0);
+
+  return Math.round((totalHours / decided.length) * 100) / 100;
+}
+
 export async function GET(req: NextRequest) {
   await connectDB();
 
@@ -150,6 +170,35 @@ export async function GET(req: NextRequest) {
       { $group: { _id: null, total: { $sum: '$amount' } } },
     ]);
 
+    // ── Admin Performance: Access Request Stats ──
+    const accessRequestStats = await Order.aggregate([
+      { $match: { paymentStatus: 'paid', createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: '$accessStatus',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const pendingCount = accessRequestStats.find((s) => s._id === 'pending')?.count || 0;
+    const approvedCount = accessRequestStats.find((s) => s._id === 'approved')?.count || 0;
+    const rejectedCount = accessRequestStats.find((s) => s._id === 'rejected')?.count || 0;
+    const totalDecided = approvedCount + rejectedCount;
+    const approvalRate = totalDecided > 0 ? Math.round((approvedCount / totalDecided) * 100) : 0;
+    const rejectionRate = totalDecided > 0 ? Math.round((rejectedCount / totalDecided) * 100) : 0;
+
+    // ── Admin Performance: Average Response Time ──
+    const decidedOrders = await Order.find({
+      paymentStatus: 'paid',
+      accessStatus: { $in: ['approved', 'rejected'] },
+      createdAt: { $gte: startDate },
+    })
+      .select('createdAt approvedAt rejectedAt accessStatus')
+      .lean();
+
+    const avgResponseTimeHours = computeAvgResponseTime(decidedOrders);
+
     const result = {
       summary: {
         totalRevenue: revenueAgg[0]?.totalRevenue || 0,
@@ -187,6 +236,15 @@ export async function GET(req: NextRequest) {
             }
           : null,
       })),
+      adminPerformance: {
+        avgResponseTimeHours,
+        pendingRequests: pendingCount,
+        approvedRequests: approvedCount,
+        rejectedRequests: rejectedCount,
+        approvalRate,
+        rejectionRate,
+        totalDecided,
+      },
       paymentStatusBreakdown,
       period,
     };

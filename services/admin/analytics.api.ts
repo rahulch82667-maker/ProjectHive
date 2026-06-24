@@ -56,6 +56,16 @@ export interface PaymentStatusBreakdown {
   total: number;
 }
 
+export interface AdminPerformance {
+  avgResponseTimeHours: number;
+  pendingRequests: number;
+  approvedRequests: number;
+  rejectedRequests: number;
+  approvalRate: number;
+  rejectionRate: number;
+  totalDecided: number;
+}
+
 export interface AnalyticsData {
   summary: AnalyticsSummary;
   topProjects: TopProject[];
@@ -63,6 +73,7 @@ export interface AnalyticsData {
   revenueByCategory: CategoryRevenue[];
   recentOrders: RecentOrder[];
   paymentStatusBreakdown: PaymentStatusBreakdown[];
+  adminPerformance: AdminPerformance;
   period: string;
 }
 

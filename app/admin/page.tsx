@@ -10,6 +10,7 @@ import RevenueChart from '@/components/admin/RevenueChart';
 import TopProjectsTable from '@/components/admin/TopProjectsTable';
 import CategoryBreakdown from '@/components/admin/CategoryBreakdown';
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
+import AdminPerformance from '@/components/admin/AdminPerformance';
 import { BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
 
 const PERIODS = [
@@ -121,6 +122,9 @@ export default function AdminPage() {
           <div className="space-y-6">
             {/* Summary Cards */}
             <AnalyticsSummaryCards summary={data.summary} />
+
+            {/* Admin Performance Section */}
+            <AdminPerformance performance={data.adminPerformance} />
 
             {/* Chart + Category Breakdown */}
             <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
