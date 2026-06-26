@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { signOut } from 'firebase/auth';
-import { Bell, Settings, User } from 'lucide-react';
+import { Settings, User } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
 import { auth } from '@/lib/firebase';
 import { logoutUser } from '@/store/slices/authSlice';
 import { logoutApi } from '@/services/auth/auth.api';
@@ -42,10 +43,8 @@ export default function AdminNavbar({ user }: AdminNavbarProps) {
           {/* Right Section */}
           <div className="ml-auto flex flex-col gap-3 sm:flex-row sm:items-center">
             
-            {/* Bell */}
-            <button className="inline-flex h-12 w-12 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100">
-              <Bell size={20} />
-            </button>
+            {/* Notifications */}
+            <NotificationDropdown />
 
             {/* Settings */}
             <button className="inline-flex h-12 w-12 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100">
