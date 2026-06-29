@@ -112,7 +112,7 @@ export default function NotificationDropdown() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 z-30 mt-3 w-[380px] origin-top-right rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5">
+        <div className="absolute right-0 z-30 mt-3 w-[calc(100vw-2rem)] sm:w-[380px] origin-top-right rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div>

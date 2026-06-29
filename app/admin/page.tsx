@@ -151,7 +151,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-4">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {data.paymentStatusBreakdown.map((status) => (
                   <div
                     key={status._id}

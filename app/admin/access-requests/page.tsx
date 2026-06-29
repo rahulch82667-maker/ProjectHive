@@ -276,7 +276,7 @@ export default function AdminAccessRequestsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 lg:flex-nowrap">
                       {request.accessStatus === 'pending' && (
                         <>
                           <button

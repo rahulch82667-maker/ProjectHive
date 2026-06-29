@@ -20,12 +20,12 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
       <p className="text-sm text-slate-600">
         Page <span className="font-semibold text-slate-900">{page}</span> of <span className="font-semibold text-slate-900">{totalPages}</span>
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
         <button
           type="button"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="rounded-3xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-3xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Previous
         </button>
@@ -34,7 +34,11 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
             key={pageNumber}
             type="button"
             onClick={() => onPageChange(pageNumber)}
-            className={`rounded-3xl px-4 py-2 text-sm font-semibold transition ${pageNumber === page ? 'bg-amber-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+            className={`rounded-3xl px-2.5 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-semibold transition ${
+              pageNumber === page
+                ? 'bg-amber-600 text-white'
+                : 'bg-white text-slate-700 hover:bg-slate-100'
+            }`}
           >
             {pageNumber}
           </button>
@@ -43,7 +47,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
           type="button"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="rounded-3xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-3xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next
         </button>

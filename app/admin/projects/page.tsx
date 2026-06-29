@@ -46,14 +46,14 @@ export default function AdminProjectsPage() {
       <AdminLayout>
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Projects</h1>
               <p className="mt-1 text-sm text-slate-600">Manage all project listings</p>
             </div>
             <button
               onClick={() => router.push('/admin/projects/add')}
-              className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-6 py-3 font-semibold text-white hover:bg-amber-700 transition"
+              className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-6 py-3 font-semibold text-white hover:bg-amber-700 transition self-start sm:self-auto"
             >
               + Add Project
             </button>
