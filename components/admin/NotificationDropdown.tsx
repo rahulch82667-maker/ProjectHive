@@ -99,7 +99,7 @@ export default function NotificationDropdown() {
           setIsOpen(!isOpen);
           if (!isOpen) loadNotifications();
         }}
-        className="relative inline-flex h-12 w-12 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+        className="relative inline-flex h-12 w-12 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
         aria-label="Notifications"
       >
         <Bell size={20} />
@@ -112,20 +112,20 @@ export default function NotificationDropdown() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 z-30 mt-3 w-[calc(100vw-2rem)] sm:w-[380px] origin-top-right rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5">
+        <div className="absolute right-0 z-30 mt-3 w-[calc(100vw-2rem)] sm:w-[380px] origin-top-right rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
               {counts && (
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   {counts.newProjects} new · {counts.draftProjects} drafts · {counts.pendingApprovals} pending
                 </p>
               )}
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:text-slate-500"
             >
               <X size={14} />
             </button>
@@ -141,11 +141,11 @@ export default function NotificationDropdown() {
 
             {!loading && notifications.length === 0 && (
               <div className="flex flex-col items-center py-10 text-center">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
                   <Bell size={20} className="text-slate-400" />
                 </div>
-                <p className="mt-3 text-sm font-medium text-slate-700">No notifications</p>
-                <p className="mt-1 text-xs text-slate-400">You're all caught up!</p>
+                <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-300">No notifications</p>
+                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">You're all caught up!</p>
               </div>
             )}
 
@@ -157,7 +157,7 @@ export default function NotificationDropdown() {
                 <button
                   key={`${notification.type}-${notification.projectTitle}-${index}`}
                   onClick={() => handleNotificationClick(notification)}
-                  className="flex w-full items-start gap-3 px-5 py-3.5 text-left transition hover:bg-slate-50 border-b border-slate-50 last:border-b-0"
+                  className="flex w-full items-start gap-3 px-5 py-3.5 text-left transition hover:bg-slate-50 border-b border-slate-50 last:border-b-0 dark:hover:bg-slate-800/40 dark:border-slate-800/50"
                 >
                   {/* Icon */}
                   <div
@@ -168,14 +168,14 @@ export default function NotificationDropdown() {
 
                   {/* Content */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {notification.label}
                     </p>
-                    <p className="mt-0.5 text-sm text-slate-800 line-clamp-2">
+                    <p className="mt-0.5 text-sm text-slate-800 line-clamp-2 dark:text-slate-200">
                       {notification.message}
                     </p>
                     <div className="mt-1 flex items-center gap-1.5">
-                      <span className="text-[11px] text-slate-400">{timeAgo(notification.createdAt)}</span>
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">{timeAgo(notification.createdAt)}</span>
                       <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-amber-600 hover:text-amber-700">
                         View <ExternalLink size={10} />
                       </span>
@@ -188,13 +188,13 @@ export default function NotificationDropdown() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="border-t border-slate-100 px-5 py-3">
+            <div className="border-t border-slate-100 px-5 py-3 dark:border-slate-800">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   router.push('/admin/access-requests');
                 }}
-                className="w-full rounded-xl bg-slate-50 py-2 text-center text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                className="w-full rounded-xl bg-slate-50 py-2 text-center text-xs font-semibold text-slate-600 transition hover:bg-slate-100 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 View All Notifications
               </button>

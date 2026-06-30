@@ -74,15 +74,15 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       {/* Section Header */}
       <div className="mb-6 flex items-center gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-500">
           <Activity size={20} />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Admin Performance</h3>
-          <p className="text-xs text-slate-500">Access request handling efficiency</p>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Admin Performance</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Access request handling efficiency</p>
         </div>
       </div>
 
@@ -91,10 +91,10 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
         {cards.map((card) => (
           <div
             key={card.title}
-            className="rounded-xl border border-slate-100 bg-slate-50 p-4 transition hover:shadow-sm"
+            className="rounded-xl border border-slate-100 bg-slate-50 p-4 transition hover:shadow-sm dark:border-slate-800/50 dark:bg-slate-950/40"
           >
             <div className="flex items-center justify-between">
-              <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm">
+              <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm dark:bg-slate-900 dark:text-slate-300">
                 {card.icon}
               </div>
               {card.badge && (
@@ -104,9 +104,9 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
               )}
             </div>
             <div className="mt-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{card.title}</p>
-              <p className="mt-1.5 text-2xl font-bold text-slate-900">{card.value}</p>
-              <p className="mt-1 text-xs text-slate-500">{card.subtitle}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">{card.title}</p>
+              <p className="mt-1.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{card.value}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{card.subtitle}</p>
             </div>
           </div>
         ))}
@@ -114,22 +114,22 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
 
       {/* Progress Bar: Approval vs Rejection */}
       {performance.totalDecided > 0 && (
-        <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4">
+        <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800/50 dark:bg-slate-950/40">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-emerald-600" />
-              <span className="text-xs font-semibold text-slate-600">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                 Approved ({performance.approvedRequests})
               </span>
             </div>
             <div className="flex items-center gap-2">
               <XCircle size={16} className="text-rose-600" />
-              <span className="text-xs font-semibold text-slate-600">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                 Rejected ({performance.rejectedRequests})
               </span>
             </div>
           </div>
-          <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200">
+          <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
             <div
               className="h-full rounded-l-full bg-emerald-500 transition-all duration-500"
               style={{ width: `${performance.approvalRate}%` }}
@@ -141,7 +141,7 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
               title={`Rejected: ${performance.rejectionRate}%`}
             />
           </div>
-          <div className="mt-2 flex justify-between text-xs text-slate-400">
+          <div className="mt-2 flex justify-between text-xs text-slate-400 dark:text-slate-500">
             <span>{performance.approvalRate}% approval</span>
             <span>{performance.rejectionRate}% rejection</span>
           </div>
@@ -150,10 +150,10 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
 
       {/* Empty State */}
       {performance.totalDecided === 0 && (
-        <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-          <Activity size={32} className="mx-auto text-slate-300" />
-          <p className="mt-2 text-sm font-medium text-slate-600">No decisions yet</p>
-          <p className="text-xs text-slate-400">
+        <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-800 dark:bg-slate-900/30">
+          <Activity size={32} className="mx-auto text-slate-300 dark:text-slate-600" />
+          <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">No decisions yet</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">
             Approve or reject access requests to see performance metrics here.
           </p>
         </div>

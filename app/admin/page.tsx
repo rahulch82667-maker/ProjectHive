@@ -51,25 +51,25 @@ export default function AdminPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-slate-400">Dashboard</p>
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900">
+              <p className="text-sm uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">Dashboard</p>
+              <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
                 Analytics Overview
               </h1>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Real-time sales data and performance metrics for every project
               </p>
             </div>
             <div className="flex items-center gap-3">
               {/* Period Selector */}
-              <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+              <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 {PERIODS.map((p) => (
                   <button
                     key={p.value}
                     onClick={() => setPeriod(p.value)}
                     className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                       period === p.value
-                        ? 'bg-amber-100 text-amber-800 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-amber-100 text-amber-800 shadow-sm dark:bg-amber-900/40 dark:text-amber-400'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                   >
                     {p.label}
@@ -79,7 +79,7 @@ export default function AdminPage() {
               <button
                 onClick={() => loadAnalytics(period)}
                 disabled={loading}
-                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                 Refresh
@@ -93,7 +93,7 @@ export default function AdminPage() {
           <div className="flex h-96 items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-200 border-t-amber-600" />
-              <p className="text-sm text-slate-500">Loading analytics data...</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Loading analytics data...</p>
             </div>
           </div>
         )}
@@ -102,14 +102,14 @@ export default function AdminPage() {
         {error && (
           <div className="flex h-96 items-center justify-center">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100">
-                <AlertCircle size={28} className="text-rose-600" />
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950/40">
+                <AlertCircle size={28} className="text-rose-600 dark:text-rose-500" />
               </div>
-              <p className="text-sm font-medium text-slate-900">Failed to load analytics</p>
-              <p className="text-xs text-slate-500 max-w-md">{error}</p>
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Failed to load analytics</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">{error}</p>
               <button
                 onClick={() => loadAnalytics(period)}
-                className="mt-2 rounded-xl bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-200"
+                className="mt-2 rounded-xl bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
               >
                 Try Again
               </button>
@@ -139,15 +139,15 @@ export default function AdminPage() {
             </div>
 
             {/* Quick Status Footer */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-500">
                     <BarChart3 size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Payment Status</p>
-                    <p className="text-xs text-slate-500">Breakdown of all transactions</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Payment Status</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Breakdown of all transactions</p>
                   </div>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function AdminPage() {
                 {data.paymentStatusBreakdown.map((status) => (
                   <div
                     key={status._id}
-                    className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center"
+                    className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-slate-800/50 dark:bg-slate-950/40"
                   >
                     <span
                       className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
@@ -168,8 +168,8 @@ export default function AdminPage() {
                     >
                       {status._id}
                     </span>
-                    <p className="mt-2 text-2xl font-bold text-slate-900">{status.count}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{status.count}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',

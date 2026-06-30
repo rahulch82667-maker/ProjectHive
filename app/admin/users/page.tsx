@@ -99,7 +99,7 @@ export default function AdminUsersPage() {
     <AdminProtectedRoute>
       <AdminLayout>
         <div className="space-y-6">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="flex w-full items-center gap-3">
                 <label htmlFor="user-search" className="sr-only">Search users</label>
@@ -110,7 +110,7 @@ export default function AdminUsersPage() {
                   onChange={(event) => setSearchInput(event.target.value)}
                   onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
                   placeholder="Search by name or email"
-                  className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:bg-white"
+                  className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:border-amber-500 dark:focus:bg-slate-800"
                 />
                 <button
                   type="button"
@@ -126,7 +126,7 @@ export default function AdminUsersPage() {
           {/* Remove the grid layout and use full width */}
           <div className="space-y-4">
             {error && (
-              <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+              <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-400">
                 {error}
               </div>
             )}
