@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/backend/config/db';
 import { protect } from '@/backend/middlewares/auth.middleware';
 import { User } from '@/backend/models/User';
+import { createAuditLog } from '@/backend/utils/auditLogger';
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   await connectDB();
@@ -30,6 +31,9 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
       return NextResponse.json({ message: 'You cannot remove admin access from yourself' }, { status: 400 });
     }
 
+    const oldRole = user.role;
+    const oldBlocked = user.isBlocked;
+
     if (role !== undefined) {
       user.role = role;
     }
@@ -42,6 +46,24 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     }
 
     await user.save();
+
+    if (role !== undefined && role !== oldRole) {
+      await createAuditLog({
+        userId: currentUser._id,
+        action: 'USER_ROLE_CHANGE',
+        details: `Changed role for user "${user.name}" (${user.email}) to "${role}"`,
+        req,
+      });
+    }
+
+    if (typeof isBlocked === 'boolean' && isBlocked !== oldBlocked) {
+      await createAuditLog({
+        userId: currentUser._id,
+        action: 'USER_BLOCK_TOGGLE',
+        details: `${isBlocked ? 'Blocked' : 'Unblocked'} user "${user.name}" (${user.email})`,
+        req,
+      });
+    }
 
     const updatedUser = await User.findById(id).select('-password');
 

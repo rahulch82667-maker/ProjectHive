@@ -92,7 +92,7 @@ export default function NotificationDropdown() {
   const totalCount = counts ? counts.total : 0;
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className="relative inline-block">
       {/* Bell Button */}
       <button
         onClick={() => {
@@ -110,9 +110,9 @@ export default function NotificationDropdown() {
         )}
       </button>
 
-      {/* Dropdown */}
+      {/* Dropdown - PERFECTLY CENTERED on all screen sizes */}
       {isOpen && (
-        <div className="absolute right-0 z-30 mt-3 w-[calc(100vw-2rem)] sm:w-[380px] origin-top-right rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
+        <div className="absolute left-1/2 -translate-x-1/2 z-30 mt-3 w-[calc(100vw-2rem)] sm:w-[420px] md:w-[460px] lg:w-[500px] max-w-[500px] origin-top rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
             <div>
@@ -166,8 +166,8 @@ export default function NotificationDropdown() {
                     <Icon size={16} className={config.iconColor} />
                   </div>
 
-                  {/* Content */}
-                  <div className="min-w-0 flex-1">
+                   {/* Content */}
+                 <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {notification.label}
                     </p>

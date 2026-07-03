@@ -33,6 +33,8 @@ export interface IProject extends Document {
   version?: string;
   zipUrl?: string;
   changelog: Array<{ version: string; date: Date; notes: string }>;
+  tasks: Array<{ _id: string; name: string; completed: boolean }>;
+  budget?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -163,6 +165,19 @@ const projectSchema: Schema<IProject> = new mongoose.Schema(
         notes: { type: String },
       },
     ],
+    tasks: {
+      type: [
+        {
+          name: { type: String, required: true },
+          completed: { type: Boolean, default: false },
+        },
+      ],
+      default: [],
+    },
+    budget: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

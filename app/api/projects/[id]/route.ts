@@ -3,6 +3,7 @@ import { connectDB } from '@/backend/config/db';
 import Project from '@/backend/models/Project';
 import { protect } from '@/backend/middlewares/auth.middleware';
 import mongoose from 'mongoose';
+import { createAuditLog } from '@/backend/utils/auditLogger';
 
 //  GET
 export async function GET(
@@ -117,6 +118,13 @@ export async function PUT(
 
     const updatedProject = await project.save();
 
+    await createAuditLog({
+      userId: user._id,
+      action: 'PROJECT_EDIT',
+      details: `Updated project "${project.title}"`,
+      req: request,
+    });
+
     return NextResponse.json({
       message: 'Project updated successfully',
       project: updatedProject,
@@ -137,7 +145,7 @@ export async function DELETE(
 ) {
   try {
     await connectDB();
-    await protect();
+    const user = await protect();
     const { id } = await context.params;
 
     if (!mongoose.isValidObjectId(id)) {
@@ -149,6 +157,13 @@ export async function DELETE(
     if (!project) {
       return NextResponse.json({ message: 'Project not found' }, { status: 404 });
     }
+
+    await createAuditLog({
+      userId: user._id,
+      action: 'PROJECT_DELETE',
+      details: `Deleted project "${project.title}"`,
+      req: request,
+    });
 
     return NextResponse.json({ message: 'Project deleted successfully' });
   } catch (error: any) {

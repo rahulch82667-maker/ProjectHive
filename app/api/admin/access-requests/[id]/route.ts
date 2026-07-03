@@ -6,6 +6,7 @@ import { User } from '@/backend/models/User';
 import { protect, adminOnly } from '@/backend/middlewares/auth.middleware';
 import { sendEmail } from '@/backend/utils/email';
 import mongoose from 'mongoose';
+import { createAuditLog } from '@/backend/utils/auditLogger';
 
 export async function PUT(
   request: NextRequest,
@@ -51,6 +52,13 @@ export async function PUT(
       order.approvedAt = new Date();
       await order.save();
 
+      await createAuditLog({
+        userId: admin._id,
+        action: 'ACCESS_REQUEST_DECISION',
+        details: `Approved access request for project "${project.title}" by user "${user.name}" (${user.email})`,
+        req: request,
+      });
+
       // Send approval email to user
       const approvalEmailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
@@ -82,6 +90,13 @@ export async function PUT(
       order.accessStatus = 'rejected';
       order.rejectedAt = new Date();
       await order.save();
+
+      await createAuditLog({
+        userId: admin._id,
+        action: 'ACCESS_REQUEST_DECISION',
+        details: `Rejected access request for project "${project.title}" by user "${user.name}" (${user.email})`,
+        req: request,
+      });
 
       // Send rejection email to user
       const rejectionEmailHtml = `

@@ -34,6 +34,8 @@ export interface Project extends ProjectFormData {
   favoritesCount: number;
   cartCount: number;
   changelog: Array<{ version: string; date: string; notes: string }>;
+  tasks?: Array<{ id: string; name: string; completed: boolean }>;
+  budget?: number;
   createdBy: { _id: string; name: string; email: string };
   updatedBy: { _id: string; name: string; email: string };
   createdAt: string;

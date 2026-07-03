@@ -9,13 +9,14 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { logoutUser } from '@/store/slices/authSlice';
 import { logoutApi } from '@/services/auth/auth.api';
-import { LayoutDashboard, Users2, FolderOpen, LogOut, KeyRound, X } from 'lucide-react';
+import { LayoutDashboard, Users2, FolderOpen, LogOut, KeyRound, X, ShieldAlert } from 'lucide-react';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Users', href: '/admin/users', icon: Users2 },
   { label: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { label: 'Access Requests', href: '/admin/access-requests', icon: KeyRound },
+  { label: 'Audit Logs', href: '/admin/audit-logs', icon: ShieldAlert },
 ];
 
 interface AdminSidebarProps {

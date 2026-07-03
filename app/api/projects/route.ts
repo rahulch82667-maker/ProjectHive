@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/backend/config/db';
 import Project from '@/backend/models/Project';
 import { protect } from '@/backend/middlewares/auth.middleware';
+import { createAuditLog } from '@/backend/utils/auditLogger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -172,6 +173,13 @@ export async function POST(request: NextRequest) {
     });
 
     const savedProject = await project.save();
+
+    await createAuditLog({
+      userId: user._id,
+      action: 'PROJECT_CREATE',
+      details: `Created project "${project.title}"`,
+      req: request,
+    });
 
     return NextResponse.json({ message: 'Project created successfully', project: savedProject }, { status: 201 });
   } catch (error: any) {
