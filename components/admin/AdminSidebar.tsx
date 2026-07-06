@@ -44,40 +44,42 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
 
   return (
     <>
-      {/* Backdrop for mobile */}
+      {/* Backdrop for mobile/tablet */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 md:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white px-6 py-8 transition-transform duration-300 ease-in-out lg:static lg:w-72 xl:w-80 lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200 bg-white px-4 py-6 transition-transform duration-300 ease-in-out sm:w-72 sm:px-6 sm:py-8 md:static md:w-64 lg:w-72 xl:w-80 md:translate-x-0 dark:border-slate-800 dark:bg-slate-900 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        {/* Close button for mobile */}
+        {/* Close button for mobile/tablet */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-xl p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800"
+          className="absolute right-4 top-4 rounded-xl p-1.5 text-slate-500 hover:bg-slate-100 md:hidden dark:text-slate-400 dark:hover:bg-slate-800"
           aria-label="Close menu"
         >
           <X size={20} />
         </button>
 
-        <div className="mb-10">
-          <div className="flex justify-center mb-6">
+        <div className="mb-8 sm:mb-10">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <Image 
               src="/Images/Hive_logo.png" 
               alt="ProjectHive Logo" 
-              width={140} 
-              height={140}
-              className="object-contain"
+              width={120} 
+              height={120}
+              className="object-contain sm:w-[140px]"
               priority
             />
           </div>
-          <p className="mt-3 text-sm text-slate-500 text-center dark:text-slate-400">Admin control center for projects, users and analytics.</p>
+          <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 text-center dark:text-slate-400">
+            Admin control center for projects, users and analytics.
+          </p>
         </div>
 
         <nav className="flex-1 space-y-1">
@@ -109,7 +111,7 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
         </nav>
 
         {/* Logout Button */}
-        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-800">
           <button
             onClick={() => {
               onClose?.();
@@ -126,4 +128,4 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
       </aside>
     </>
   );
-}
+}

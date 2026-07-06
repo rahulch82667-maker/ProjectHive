@@ -50,25 +50,25 @@ export default function AdminPage() {
     <AdminProtectedRoute>
       <AdminLayout user={user ?? undefined}>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">Dashboard</p>
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">Dashboard</p>
+              <h1 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">
                 Analytics Overview
               </h1>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                 Real-time sales data and performance metrics for every project
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Period Selector */}
-              <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              {/* Period Selector - Scrollable on mobile */}
+              <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm overflow-x-auto dark:border-slate-800 dark:bg-slate-900">
                 {PERIODS.map((p) => (
                   <button
                     key={p.value}
                     onClick={() => setPeriod(p.value)}
-                    className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
+                    className={`whitespace-nowrap rounded-xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold transition-all ${
                       period === p.value
                         ? 'bg-amber-100 text-amber-800 shadow-sm dark:bg-amber-900/40 dark:text-amber-400'
                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -78,21 +78,23 @@ export default function AdminPage() {
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => loadAnalytics(period)}
-                disabled={loading}
-                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                Refresh
-              </button>
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 rounded-2xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
-              >
-                <FileDown size={14} />
-                Export
-              </button>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={() => loadAnalytics(period)}
+                  disabled={loading}
+                  className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                  <span className="hidden sm:inline">Refresh</span>
+                </button>
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="flex items-center gap-2 rounded-2xl bg-amber-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+                >
+                  <FileDown size={14} />
+                  <span className="hidden sm:inline">Export</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -136,13 +138,13 @@ export default function AdminPage() {
             <AdminPerformance performance={data.adminPerformance} />
 
             {/* Chart + Category Breakdown */}
-            <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+            <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-[1.6fr_1fr]">
               <RevenueChart data={data.monthlyRevenue} />
               <CategoryBreakdown data={data.revenueByCategory} />
             </div>
 
             {/* Top Projects + Recent Orders */}
-            <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+            <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-[1.6fr_1fr]">
               <TopProjectsTable projects={data.topProjects} />
               <RecentOrdersTable orders={data.recentOrders} />
             </div>

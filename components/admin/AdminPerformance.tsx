@@ -74,39 +74,39 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       {/* Section Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-500">
-          <Activity size={20} />
+      <div className="mb-4 sm:mb-6 flex items-center gap-3">
+        <div className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-500">
+          <Activity size={18} />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Admin Performance</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Access request handling efficiency</p>
+          <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">Admin Performance</h3>
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Access request handling efficiency</p>
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
           <div
             key={card.title}
-            className="rounded-xl border border-slate-100 bg-slate-50 p-4 transition hover:shadow-sm dark:border-slate-800/50 dark:bg-slate-950/40"
+            className="rounded-xl border border-slate-100 bg-slate-50 p-3 sm:p-4 transition hover:shadow-sm dark:border-slate-800/50 dark:bg-slate-950/40"
           >
-            <div className="flex items-center justify-between">
-              <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm dark:bg-slate-900 dark:text-slate-300">
+            <div className="flex items-center justify-between gap-2">
+              <div className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm dark:bg-slate-900 dark:text-slate-300">
                 {card.icon}
               </div>
               {card.badge && (
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${card.badgeColor}`}>
+                <span className={`rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold ${card.badgeColor}`}>
                   {card.badge}
                 </span>
               )}
             </div>
-            <div className="mt-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">{card.title}</p>
-              <p className="mt-1.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{card.value}</p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{card.subtitle}</p>
+            <div className="mt-3 sm:mt-4">
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">{card.title}</p>
+              <p className="mt-1 sm:mt-1.5 text-lg sm:text-2xl font-bold text-slate-900 dark:text-slate-100">{card.value}</p>
+              <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">{card.subtitle}</p>
             </div>
           </div>
         ))}
@@ -114,7 +114,7 @@ export default function AdminPerformance({ performance }: AdminPerformanceProps)
 
       {/* Progress Bar: Approval vs Rejection */}
       {performance.totalDecided > 0 && (
-        <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800/50 dark:bg-slate-950/40">
+        <div className="mt-4 sm:mt-6 rounded-xl border border-slate-100 bg-slate-50 p-3 sm:p-4 dark:border-slate-800/50 dark:bg-slate-950/40">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-emerald-600" />

@@ -25,19 +25,19 @@ export default function RevenueChart({ data }: RevenueChartProps) {
     }).format(amount);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Revenue Trend</h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Monthly revenue overview</p>
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100">Revenue Trend</h3>
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">Monthly revenue overview</p>
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-4 sm:mt-8">
         {/* Chart area */}
-        <div className="relative h-64">
+        <div className="relative h-48 sm:h-64">
           {/* Y-axis labels */}
-          <div className="absolute inset-0 flex flex-col justify-between text-xs text-slate-400 dark:text-slate-500">
+          <div className="absolute inset-0 flex flex-col justify-between text-[10px] sm:text-xs text-slate-400 dark:text-slate-500">
             <span>{formatCurrency(maxRevenue)}</span>
             <span>{formatCurrency(Math.round(maxRevenue * 0.75))}</span>
             <span>{formatCurrency(Math.round(maxRevenue * 0.5))}</span>
@@ -46,7 +46,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
           </div>
 
           {/* Grid lines */}
-          <div className="ml-16 h-full">
+          <div className="ml-12 sm:ml-16 h-full">
             {[0, 1, 2, 3, 4].map((i) => (
               <div
                 key={i}
@@ -56,7 +56,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
             ))}
 
             {/* Bars */}
-            <div className="absolute inset-0 ml-16 flex items-end gap-2 pb-6">
+            <div className="absolute inset-0 ml-12 sm:ml-16 flex items-end gap-1 sm:gap-2 pb-4 sm:pb-6">
               {data.map((item) => {
                 const height = (item.revenue / maxRevenue) * 100;
                 return (
@@ -65,18 +65,18 @@ export default function RevenueChart({ data }: RevenueChartProps) {
                     className="group relative flex flex-1 flex-col items-center justify-end h-full"
                   >
                     {/* Tooltip */}
-                    <div className="absolute -top-8 z-10 hidden group-hover:block">
-                      <div className="whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg dark:bg-slate-800 dark:text-slate-100">
+                    <div className="absolute -top-7 sm:-top-8 z-10 hidden group-hover:block">
+                      <div className="whitespace-nowrap rounded-lg bg-slate-900 px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-white shadow-lg dark:bg-slate-800 dark:text-slate-100">
                         {formatCurrency(item.revenue)}
                       </div>
                     </div>
                     {/* Bar */}
                     <div
-                      className="w-full max-w-[40px] rounded-t-lg bg-gradient-to-t from-amber-500 to-amber-400 transition-all hover:from-amber-600 hover:to-amber-500"
+                      className="w-full max-w-[24px] sm:max-w-[40px] rounded-t-md sm:rounded-t-lg bg-gradient-to-t from-amber-500 to-amber-400 transition-all hover:from-amber-600 hover:to-amber-500"
                       style={{ height: `${Math.max(height, 2)}%` }}
                     />
                     {/* Month label */}
-                    <span className="absolute -bottom-5 text-[10px] text-slate-400 whitespace-nowrap dark:text-slate-500">
+                    <span className="absolute -bottom-4 sm:-bottom-5 text-[8px] sm:text-[10px] text-slate-400 whitespace-nowrap dark:text-slate-500">
                       {item.month.slice(5)}
                     </span>
                   </div>
@@ -88,22 +88,22 @@ export default function RevenueChart({ data }: RevenueChartProps) {
       </div>
 
       {/* Legend / Summary */}
-      <div className="mt-8 grid grid-cols-3 gap-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+      <div className="mt-4 sm:mt-8 grid grid-cols-3 gap-2 sm:gap-4 border-t border-slate-100 pt-3 sm:pt-4 dark:border-slate-800">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Total Revenue</p>
-          <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Total Revenue</p>
+          <p className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-900 dark:text-slate-100">
             {formatCurrency(data.reduce((sum, d) => sum + d.revenue, 0))}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Total Orders</p>
-          <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Total Orders</p>
+          <p className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-900 dark:text-slate-100">
             {data.reduce((sum, d) => sum + d.orders, 0)}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Avg Monthly</p>
-          <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Avg Monthly</p>
+          <p className="mt-0.5 sm:mt-1 text-sm sm:text-lg font-semibold text-slate-900 dark:text-slate-100">
             {formatCurrency(Math.round(data.reduce((sum, d) => sum + d.revenue, 0) / data.length))}
           </p>
         </div>

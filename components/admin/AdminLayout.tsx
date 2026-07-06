@@ -57,7 +57,7 @@ export default function AdminLayout({ children, user }: AdminLayoutProps) {
             onThemeToggle={toggleTheme}
           />
 
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8 overflow-y-auto">
+          <main className="flex-1 px-3 py-4 sm:px-5 sm:py-6 md:px-8 md:py-8 lg:px-10 lg:py-8 overflow-y-auto">
             {children}
           </main>
         </div>

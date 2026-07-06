@@ -44,8 +44,8 @@ export default function AdminNavbar({ user, onMenuClick, theme = 'light', onThem
       <div className="px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           
-          {/* Left Section: Menu Toggle + Brand Logo (Mobile only) */}
-          <div className="flex items-center gap-3 lg:hidden">
+          {/* Left Section: Menu Toggle + Brand Logo (Mobile/Tablet only) */}
+          <div className="flex items-center gap-3 md:hidden">
             <button
               onClick={onMenuClick}
               className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"

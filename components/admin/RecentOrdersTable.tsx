@@ -21,22 +21,22 @@ export default function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-center justify-between mb-4">
+    <div className="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Recent Orders</h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Latest completed purchases</p>
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100">Recent Orders</h3>
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">Latest completed purchases</p>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {orders.map((order) => (
           <div
             key={order.id}
-            className="flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-800/40"
+            className="flex items-center gap-3 sm:gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 sm:p-3 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-800/40"
           >
             {/* Project Thumbnail */}
-            <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
               {order.project?.thumbnail ? (
                 <Image
                   src={order.project.thumbnail}
