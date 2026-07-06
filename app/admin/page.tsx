@@ -11,7 +11,8 @@ import TopProjectsTable from '@/components/admin/TopProjectsTable';
 import CategoryBreakdown from '@/components/admin/CategoryBreakdown';
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
 import AdminPerformance from '@/components/admin/AdminPerformance';
-import { BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
+import ExportReportsModal from '@/components/admin/ExportReportsModal';
+import { BarChart3, RefreshCw, AlertCircle, FileDown } from 'lucide-react';
 
 const PERIODS = [
   { value: 'week', label: 'This Week' },
@@ -26,6 +27,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState('month');
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const loadAnalytics = useCallback(async (selectedPeriod: string) => {
     setLoading(true);
@@ -83,6 +85,13 @@ export default function AdminPage() {
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                 Refresh
+              </button>
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center gap-2 rounded-2xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+              >
+                <FileDown size={14} />
+                Export
               </button>
             </div>
           </div>
@@ -182,6 +191,10 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+        <ExportReportsModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+        />
       </AdminLayout>
     </AdminProtectedRoute>
   );
